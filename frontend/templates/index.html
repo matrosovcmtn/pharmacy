@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Система управления аптекой</title>
+    <link rel="stylesheet" href="/static/css/bootstrap.min.css">
+    <link rel="stylesheet" href="/static/css/styles.css">
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+        <div class="container">
+            <a class="navbar-brand" href="/">Система управления аптекой</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav" id="main-nav">
+                    <li class="nav-item">
+                        <a class="nav-link active" href="/">Главная</a>
+                    </li>
+                    <!-- Остальные пункты меню будут добавлены через JavaScript для авторизованных пользователей -->
+                </ul>
+                <ul class="navbar-nav ms-auto" id="auth-nav">
+                    <!-- Эти элементы будут заменены через JavaScript в зависимости от статуса авторизации -->
+                    <li class="nav-item">
+                        <a class="nav-link" href="/login">Вход</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/register">Регистрация</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container mt-4">
+        <div class="jumbotron">
+            <h1 class="display-4">Добро пожаловать в систему управления аптекой!</h1>
+            <p class="lead">Эта система позволяет директору аптеки управлять сведениями об аптеке, товарах и поставщиках.</p>
+            <hr class="my-4">
+            
+            <!-- Сообщение для неавторизованных пользователей -->
+            <div class="alert alert-info" id="auth-required-message">
+                <h4>Для доступа к функциям системы необходимо авторизоваться</h4>
+                <p>Для работы с системой вам необходимо <a href="/login" class="alert-link">войти</a> или <a href="/register" class="alert-link">зарегистрироваться</a>.</p>
+                <p>Для входа в качестве администратора используйте:</p>
+                <ul>
+                    <li>Email: admin@pharmacy.com</li>
+                    <li>Пароль: admin123</li>
+                </ul>
+            </div>
+            
+            <!-- Блок с разделами для авторизованных пользователей -->
+            <div id="sections-block">
+                <p>Выберите раздел для работы:</p>
+                <div class="row">
+                <div class="col-md-4 mb-3">
+                    <div class="card">
+                        <div class="card-body">
+                            <h5 class="card-title">Аптеки</h5>
+                            <p class="card-text">Управление сведениями об аптеках.</p>
+                            <a href="/pharmacy" class="btn btn-primary">Перейти</a>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4 mb-3">
+                    <div class="card">
+                        <div class="card-body">
+                            <h5 class="card-title">Товары</h5>
+                            <p class="card-text">Управление товарами в аптеках.</p>
+                            <a href="/products" class="btn btn-primary">Перейти</a>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4 mb-3">
+                    <div class="card">
+                        <div class="card-body">
+                            <h5 class="card-title">Поставщики</h5>
+                            <p class="card-text">Управление поставщиками и их товарами.</p>
+                            <a href="/suppliers" class="btn btn-primary">Перейти</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            </div>
+        </div>
+    </div>
+
+    <footer class="footer mt-auto py-3 bg-light">
+        <div class="container text-center">
+            <span class="text-muted">© 2025 Система управления аптекой</span>
+        </div>
+    </footer>
+
+    <script src="/static/js/bootstrap.bundle.min.js"></script>
+    <script src="/static/js/auth.js"></script>
+    <script src="/static/js/main.js"></script>
+</body>
+</html>

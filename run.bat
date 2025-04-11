@@ -1,0 +1,6 @@
+@echo off
+echo Остановка и удаление существующих контейнеров...
+docker-compose down
+
+echo Сборка и запуск контейнеров...
+docker-compose up --build

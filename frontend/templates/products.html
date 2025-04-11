@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Управление товарами - Система управления аптекой</title>
+    <link rel="stylesheet" href="/static/css/bootstrap.min.css">
+    <link rel="stylesheet" href="/static/css/styles.css">
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+        <div class="container">
+            <a class="navbar-brand" href="/">Система управления аптекой</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav">
+                    <li class="nav-item">
+                        <a class="nav-link" href="/pharmacy">Аптеки</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active" href="/products">Товары</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/suppliers">Поставщики</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container mt-4">
+        <h1>Управление товарами</h1>
+        
+        <div class="row mb-4">
+            <div class="col-md-12">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0">Добавить новый товар</h5>
+                    </div>
+                    <div class="card-body">
+                        <form id="productForm">
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label for="productName" class="form-label">Название товара</label>
+                                    <input type="text" class="form-control" id="productName" required>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label for="productPrice" class="form-label">Цена</label>
+                                    <input type="number" step="0.01" class="form-control" id="productPrice" required>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label for="productDosages" class="form-label">Фасовки (через запятую)</label>
+                                    <input type="text" class="form-control" id="productDosages" placeholder="5 мг, 10 мг, 15 мг" required>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label for="productQuantity" class="form-label">Количество</label>
+                                    <input type="number" class="form-control" id="productQuantity" required>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label for="productExpiryDate" class="form-label">Срок годности</label>
+                                    <input type="datetime-local" class="form-control" id="productExpiryDate" required>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label for="productPreferredSupplier" class="form-label">Предпочтительный поставщик</label>
+                                    <select class="form-select" id="productPreferredSupplier">
+                                        <option value="">Выберите поставщика</option>
+                                        <!-- Данные будут загружены с помощью JavaScript -->
+                                    </select>
+                                </div>
+                            </div>
+                            <button type="submit" class="btn btn-primary">Добавить</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row mb-4">
+            <div class="col-md-12">
+                <div class="card">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <h5 class="card-title mb-0">Список товаров</h5>
+                        <div>
+                            <button class="btn btn-outline-danger btn-sm" id="showExpiredProducts">Просроченные товары</button>
+                            <button class="btn btn-outline-primary btn-sm" id="showAllProducts">Все товары</button>
+                            <span class="ms-3">Общая стоимость: <span id="totalCost">0.00</span> руб.</span>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-striped">
+                                <thead>
+                                    <tr>
+                                        <th>ID</th>
+                                        <th>Название</th>
+                                        <th>Фасовка</th>
+                                        <th>Цена</th>
+                                        <th>Количество</th>
+                                        <th>Срок годности</th>
+                                        <th>Предпочтительный поставщик</th>
+                                        <th>Действия</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="productList">
+                                    <!-- Данные будут загружены с помощью JavaScript -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Модальное окно для редактирования товара -->
+        <div class="modal fade" id="editProductModal" tabindex="-1" aria-labelledby="editProductModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-lg">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="editProductModalLabel">Редактировать товар</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <form id="editProductForm">
+                            <input type="hidden" id="editProductId">
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label for="editProductName" class="form-label">Название товара</label>
+                                    <input type="text" class="form-control" id="editProductName" required>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label for="editProductPrice" class="form-label">Цена</label>
+                                    <input type="number" step="0.01" class="form-control" id="editProductPrice" required>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label for="editProductDosages" class="form-label">Фасовки (через запятую)</label>
+                                    <input type="text" class="form-control" id="editProductDosages" required>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label for="editProductQuantity" class="form-label">Количество</label>
+                                    <input type="number" class="form-control" id="editProductQuantity" required>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label for="editProductExpiryDate" class="form-label">Срок годности</label>
+                                    <input type="datetime-local" class="form-control" id="editProductExpiryDate" required>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label for="editProductPreferredSupplier" class="form-label">Предпочтительный поставщик</label>
+                                    <select class="form-select" id="editProductPreferredSupplier">
+                                        <option value="">Выберите поставщика</option>
+                                        <!-- Данные будут загружены с помощью JavaScript -->
+                                    </select>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Отмена</button>
+                        <button type="button" class="btn btn-primary" id="saveProductChanges">Сохранить</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Модальное окно для добавления товара в аптеку -->
+        <div class="modal fade" id="addToPharmacyModal" tabindex="-1" aria-labelledby="addToPharmacyModalLabel" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="addToPharmacyModalLabel">Добавить товар в аптеку</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <form id="addToPharmacyForm">
+                            <input type="hidden" id="addToPharmacyProductId">
+                            <div class="mb-3">
+                                <label for="addToPharmacySelect" class="form-label">Выберите аптеку</label>
+                                <select class="form-select" id="addToPharmacySelect" required>
+                                    <!-- Данные будут загружены с помощью JavaScript -->
+                                </select>
+                            </div>
+                            <div class="mb-3">
+                                <label for="addToPharmacyQuantity" class="form-label">Количество</label>
+                                <input type="number" class="form-control" id="addToPharmacyQuantity" required>
+                            </div>
+                        </form>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Отмена</button>
+                        <button type="button" class="btn btn-primary" id="confirmAddToPharmacy">Добавить</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <footer class="footer mt-auto py-3 bg-light">
+        <div class="container text-center">
+            <span class="text-muted">© 2025 Система управления аптекой</span>
+        </div>
+    </footer>
+
+    <script src="/static/js/bootstrap.bundle.min.js"></script>
+    <script src="/static/js/auth.js"></script>
+    <script src="/static/js/main.js"></script>
+    <script src="/static/js/products.js"></script>
+</body>
+</html>

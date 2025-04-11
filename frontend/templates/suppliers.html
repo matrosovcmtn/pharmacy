@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Управление поставщиками - Система управления аптекой</title>
+    <link rel="stylesheet" href="/static/css/bootstrap.min.css">
+    <link rel="stylesheet" href="/static/css/styles.css">
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+        <div class="container">
+            <a class="navbar-brand" href="/">Система управления аптекой</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav">
+                    <li class="nav-item">
+                        <a class="nav-link" href="/pharmacy">Аптеки</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/products">Товары</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active" href="/suppliers">Поставщики</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container mt-4">
+        <h1>Управление поставщиками</h1>
+        
+        <div class="row mb-4">
+            <div class="col-md-12">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0">Добавить нового поставщика</h5>
+                    </div>
+                    <div class="card-body">
+                        <form id="supplierForm">
+                            <div class="mb-3">
+                                <label for="supplierName" class="form-label">Название поставщика</label>
+                                <input type="text" class="form-control" id="supplierName" required>
+                            </div>
+                            <button type="submit" class="btn btn-primary">Добавить</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-md-12">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0">Список поставщиков</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-striped">
+                                <thead>
+                                    <tr>
+                                        <th>ID</th>
+                                        <th>Название</th>
+                                        <th>Действия</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="supplierList">
+                                    <!-- Данные будут загружены с помощью JavaScript -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Модальное окно для редактирования поставщика -->
+        <div class="modal fade" id="editSupplierModal" tabindex="-1" aria-labelledby="editSupplierModalLabel" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="editSupplierModalLabel">Редактировать поставщика</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <form id="editSupplierForm">
+                            <input type="hidden" id="editSupplierId">
+                            <div class="mb-3">
+                                <label for="editSupplierName" class="form-label">Название поставщика</label>
+                                <input type="text" class="form-control" id="editSupplierName" required>
+                            </div>
+                        </form>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Отмена</button>
+                        <button type="button" class="btn btn-primary" id="saveSupplierChanges">Сохранить</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Модальное окно для просмотра товаров у поставщика -->
+        <div class="modal fade" id="viewSupplierProductsModal" tabindex="-1" aria-labelledby="viewSupplierProductsModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-lg">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="viewSupplierProductsModalLabel">Товары у поставщика</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="table-responsive">
+                            <table class="table table-striped">
+                                <thead>
+                                    <tr>
+                                        <th>ID</th>
+                                        <th>Название</th>
+                                        <th>Фасовка</th>
+                                        <th>Цена</th>
+                                        <th>Количество</th>
+                                        <th>Предпочтение</th>
+                                        <th>Действия</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="supplierProductsList">
+                                    <!-- Данные будут загружены с помощью JavaScript -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Закрыть</button>
+                        <button type="button" class="btn btn-primary" id="addProductToSupplier">Добавить товар</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Модальное окно для добавления товара к поставщику -->
+        <div class="modal fade" id="addProductToSupplierModal" tabindex="-1" aria-labelledby="addProductToSupplierModalLabel" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="addProductToSupplierModalLabel">Добавить товар к поставщику</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <form id="addProductToSupplierForm">
+                            <input type="hidden" id="addProductSupplierId">
+                            <div class="mb-3">
+                                <label for="addProductSelect" class="form-label">Выберите товар</label>
+                                <select class="form-select" id="addProductSelect" required>
+                                    <!-- Данные будут загружены с помощью JavaScript -->
+                                </select>
+                            </div>
+                            <div class="mb-3">
+                                <label for="addProductQuantity" class="form-label">Количество</label>
+                                <input type="number" class="form-control" id="addProductQuantity" required>
+                            </div>
+                            <div class="mb-3">
+                                <label for="addProductPreference" class="form-label">Предпочтение</label>
+                                <select class="form-select" id="addProductPreference" required>
+                                    <option value="1">1 (Высокое)</option>
+                                    <option value="2">2 (Среднее)</option>
+                                    <option value="3">3 (Низкое)</option>
+                                </select>
+                            </div>
+                        </form>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Отмена</button>
+                        <button type="button" class="btn btn-primary" id="confirmAddProductToSupplier">Добавить</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Модальное окно для поиска товаров по фасовке -->
+        <div class="modal fade" id="searchByDosageModal" tabindex="-1" aria-labelledby="searchByDosageModalLabel" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="searchByDosageModalLabel">Поиск товаров по фасовке</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <form id="searchByDosageForm">
+                            <div class="mb-3">
+                                <label for="dosageSearch" class="form-label">Фасовка</label>
+                                <input type="text" class="form-control" id="dosageSearch" placeholder="Например: 5 мг" required>
+                            </div>
+                            <button type="submit" class="btn btn-primary">Найти</button>
+                        </form>
+                        <div class="mt-4">
+                            <h6>Результаты поиска:</h6>
+                            <div class="table-responsive">
+                                <table class="table table-striped">
+                                    <thead>
+                                        <tr>
+                                            <th>Поставщик</th>
+                                            <th>Товар</th>
+                                            <th>Фасовка</th>
+                                            <th>Количество</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="dosageSearchResults">
+                                        <!-- Результаты поиска будут загружены с помощью JavaScript -->
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Закрыть</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <footer class="footer mt-auto py-3 bg-light">
+        <div class="container text-center">
+            <span class="text-muted">© 2025 Система управления аптекой</span>
+        </div>
+    </footer>
+
+    <script src="/static/js/bootstrap.bundle.min.js"></script>
+    <script src="/static/js/auth.js"></script>
+    <script src="/static/js/main.js"></script>
+    <script src="/static/js/suppliers.js"></script>
+</body>
+</html>

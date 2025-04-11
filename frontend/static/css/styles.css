@@ -1,0 +1,66 @@
+/* Основные стили для приложения */
+body {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+.footer {
+    margin-top: auto;
+}
+
+/* Стили для карточек */
+.card {
+    box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+    margin-bottom: 1.5rem;
+}
+
+.card-header {
+    background-color: #f8f9fa;
+}
+
+/* Стили для таблиц */
+.table-responsive {
+    overflow-x: auto;
+}
+
+.table th {
+    background-color: #f8f9fa;
+}
+
+/* Стили для форм */
+.form-label {
+    font-weight: 500;
+}
+
+/* Стили для навигации */
+.navbar {
+    margin-bottom: 1rem;
+}
+
+/* Стили для просроченных товаров */
+.expired {
+    background-color: #ffdddd;
+}
+
+/* Стили для модальных окон */
+.modal-header {
+    background-color: #f8f9fa;
+}
+
+/* Стили для кнопок */
+.btn-action {
+    margin-right: 0.25rem;
+}
+
+/* Адаптивные стили */
+@media (max-width: 768px) {
+    .container {
+        padding-left: 10px;
+        padding-right: 10px;
+    }
+    
+    .card-title {
+        font-size: 1.1rem;
+    }
+}
