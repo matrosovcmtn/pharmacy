@@ -123,6 +123,35 @@ def init_db(db) -> None:
             is_active=True
         )
         db.add(admin_user)
+        
+    # Создание директора по умолчанию
+    director_exists = db.query(User).filter(User.email == "director@pharmacy.com").first()
+    if not director_exists:
+        logger.info("Создание директора по умолчанию...")
+        hashed_password = get_password_hash("director123")
+        director_user = User(
+            email="director@pharmacy.com",
+            username="director",
+            hashed_password=hashed_password,
+            role=UserRole.DIRECTOR,
+            is_active=True
+        )
+        db.add(director_user)
+        
+    # Создание поставщика по умолчанию
+    supplier_exists = db.query(User).filter(User.email == "supplier@pharmacy.com").first()
+    if not supplier_exists:
+        logger.info("Создание поставщика по умолчанию...")
+        hashed_password = get_password_hash("supplier123")
+        supplier_user = User(
+            email="supplier@pharmacy.com",
+            username="supplier",
+            hashed_password=hashed_password,
+            role=UserRole.SUPPLIER,
+            is_active=True,
+            supplier_id=1  # Связываем с первым поставщиком из списка
+        )
+        db.add(supplier_user)
     
     # Сохранение всех изменений
     db.commit()

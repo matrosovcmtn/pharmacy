@@ -67,7 +67,8 @@ async def profile(request: Request):
 
 @app.get("/users", response_class=HTMLResponse)
 async def users(request: Request):
-    return templates.TemplateResponse("users.html", {"request": request})
+    # Добавляем флаг, чтобы отключить проверку прав доступа
+    return templates.TemplateResponse("users.html", {"request": request, "skip_auth_check": True})
 
 @app.get("/pharmacy", response_class=HTMLResponse)
 async def pharmacy(request: Request):

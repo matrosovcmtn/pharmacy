@@ -1,7 +1,8 @@
 // Функция для загрузки списка пользователей
 async function loadUsers() {
     try {
-        const response = await fetchWithAuth('/users/');
+        console.log('Loading users...');
+        const response = await fetchWithAuth('/users');
         
         if (!response || !response.ok) {
             throw new Error('Не удалось загрузить список пользователей');

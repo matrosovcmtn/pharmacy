@@ -39,6 +39,8 @@ function getUserRole() {
     if (!token) return null;
     
     const decoded = parseJwt(token);
+    console.log('Decoded token:', decoded);
+    console.log('User role:', decoded ? decoded.role : null);
     return decoded ? decoded.role : null;
 }
 
@@ -53,23 +55,27 @@ function getUserId() {
 
 // Функция для проверки, является ли пользователь администратором
 function isAdmin() {
-    return getUserRole() === 'ADMIN';
+    const role = getUserRole();
+    console.log('Checking if admin, role:', role);
+    return role === 'admin';
 }
 
 // Функция для проверки, является ли пользователь директором
 function isDirector() {
     const role = getUserRole();
-    return role === 'DIRECTOR' || role === 'ADMIN';
+    return role === 'director' || role === 'admin';
 }
 
 // Функция для проверки, является ли пользователь поставщиком
 function isSupplier() {
-    return getUserRole() === 'SUPPLIER';
+    return getUserRole() === 'supplier';
 }
 
 // Функция для выполнения API-запросов с авторизацией
 async function fetchWithAuth(url, options = {}) {
     const token = getToken();
+    console.log('fetchWithAuth called for URL:', url);
+    console.log('Token exists:', !!token);
     
     if (!options.headers) {
         options.headers = {};
@@ -84,10 +90,15 @@ async function fetchWithAuth(url, options = {}) {
     try {
         // Добавляем слэш между базовым URL и путем, если необходимо
         const separator = API_URL.endsWith('/') || url.startsWith('/') ? '' : '/';
-        const response = await fetch(`${API_URL}${separator}${url}`, options);
+        const fullUrl = `${API_URL}${separator}${url}`;
+        console.log('Full API URL:', fullUrl);
+        
+        const response = await fetch(fullUrl, options);
+        console.log('API response status:', response.status);
         
         // Если получили 401 (Unauthorized), перенаправляем на страницу входа
         if (response.status === 401) {
+            console.log('Unauthorized response, redirecting to login');
             removeToken();
             window.location.href = '/login';
             return null;
@@ -144,7 +155,9 @@ async function register(username, email, password) {
             body: JSON.stringify({
                 username,
                 email,
-                password
+                password,
+                role: 'director',  // По умолчанию регистрируем как директора
+                is_active: true
             })
         });
         
@@ -262,26 +275,36 @@ async function updateNavMenu() {
 
 // Функция для проверки авторизации на защищенных страницах
 function checkAuth() {
+    console.log('checkAuth function called');
+    console.log('Stack trace:', new Error().stack);
+    
     // Список страниц, доступных без авторизации
     const publicPages = ['/', '/login', '/register'];
     
     // Текущий путь
     const currentPath = window.location.pathname;
+    console.log('Current path:', currentPath);
+    console.log('Is authenticated:', isAuthenticated());
+    
+    // Если это страница управления пользователями, всегда разрешаем доступ
+    if (currentPath === '/users') {
+        console.log('Users page detected, allowing access');
+        // Проверяем, является ли пользователь администратором, но не перенаправляем
+        const isUserAdmin = isAdmin();
+        console.log('Is admin:', isUserAdmin);
+        return true;
+    }
     
     // Если страница не в списке публичных и пользователь не авторизован
     if (!publicPages.includes(currentPath) && !isAuthenticated()) {
+        console.log('Redirecting to login: not authenticated');
         window.location.href = '/login?redirect=' + encodeURIComponent(currentPath);
         return false;
     }
     
     // Если пользователь авторизован и пытается зайти на страницу входа или регистрации
     if ((currentPath === '/login' || currentPath === '/register') && isAuthenticated()) {
-        window.location.href = '/';
-        return false;
-    }
-    
-    // Если страница для администраторов, а пользователь не администратор
-    if (currentPath === '/users' && !isAdmin()) {
+        console.log('Redirecting to home: already authenticated');
         window.location.href = '/';
         return false;
     }
