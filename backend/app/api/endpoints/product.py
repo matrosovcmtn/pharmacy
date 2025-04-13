@@ -90,6 +90,19 @@ def read_products_by_pharmacy(
     return products
 
 
+@router.delete("/pharmacy/{pharmacy_id}/{product_id}")
+def delete_product_from_pharmacy(
+    pharmacy_id: int,
+    product_id: int,
+    db: Session = Depends(get_db)
+):
+    """Удалить товар из конкретной аптеки"""
+    success = product_service.delete_product_from_pharmacy(db, pharmacy_id=pharmacy_id, product_id=product_id)
+    if not success:
+        raise HTTPException(status_code=404, detail="Товар не найден в указанной аптеке")
+    return {"detail": "Товар успешно удален из аптеки"}
+
+
 @router.get("/supplier/{supplier_id}", response_model=List[Product])
 def read_products_by_supplier(
     supplier_id: int,

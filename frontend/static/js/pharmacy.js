@@ -134,11 +134,30 @@ async function deletePharmacy(id) {
     }
 }
 
+// Глобальная переменная для хранения ID текущей аптеки
+window.currentPharmacyId = null;
+
 // Функция для просмотра товаров в аптеке
 async function viewPharmacyProducts(pharmacyId, pharmacyName) {
+    console.log('viewPharmacyProducts called with pharmacyId:', pharmacyId, 'pharmacyName:', pharmacyName);
+    
+    // Убедимся, что pharmacyId является числом
+    if (typeof pharmacyId === 'string') {
+        pharmacyId = parseInt(pharmacyId);
+        console.log('Converted pharmacyId to number:', pharmacyId);
+    }
+    
+    // Сохраняем ID аптеки в глобальной переменной
+    window.currentPharmacyId = pharmacyId;
+    console.log('Set window.currentPharmacyId to:', window.currentPharmacyId);
+    
     try {
+        console.log('Fetching products for pharmacy ID:', pharmacyId);
         const products = await apiGet(`/products/pharmacy/${pharmacyId}`);
-        displayPharmacyProducts(products, pharmacyName);
+        console.log('Products received:', products.length);
+        
+        // Передаем ID аптеки в функцию отображения
+        displayPharmacyProducts(products, pharmacyName, pharmacyId);
         
         // Открытие модального окна
         const modal = new bootstrap.Modal(document.getElementById('viewProductsModal'));
@@ -149,16 +168,48 @@ async function viewPharmacyProducts(pharmacyId, pharmacyName) {
 }
 
 // Функция для отображения товаров в аптеке
-function displayPharmacyProducts(products, pharmacyName) {
+function displayPharmacyProducts(products, pharmacyName, pharmacyId) {
+    console.log('displayPharmacyProducts called with:', {
+        productsCount: products.length,
+        pharmacyName,
+        pharmacyId,
+        productsData: products.length > 0 ? products[0] : 'No products'
+    });
+    
     const productsList = document.getElementById('pharmacyProductsList');
     productsList.innerHTML = '';
+    
+    // Сохраняем ID аптеки в атрибуте данных
+    if (pharmacyId) {
+        console.log('Setting pharmacyId from parameter:', pharmacyId);
+        productsList.dataset.pharmacyId = pharmacyId;
+    } else {
+        // Если ID аптеки не передан, пробуем получить его из товаров
+        const productPharmacyId = products.length > 0 ? products[0].pharmacy_id : null;
+        if (productPharmacyId) {
+            console.log('Setting pharmacyId from products:', productPharmacyId);
+            productsList.dataset.pharmacyId = productPharmacyId;
+        } else {
+            // Если ID аптеки не найден в товарах, получаем его из URL
+            const urlParams = new URLSearchParams(window.location.search);
+            const id = urlParams.get('id');
+            if (id) {
+                console.log('Setting pharmacyId from URL:', id);
+                productsList.dataset.pharmacyId = id;
+            } else {
+                console.warn('Could not determine pharmacyId from any source!');
+            }
+        }
+    }
+    
+    console.log('Final pharmacyId in dataset:', productsList.dataset.pharmacyId);
     
     // Обновление заголовка модального окна
     document.getElementById('viewProductsModalLabel').textContent = `Товары в аптеке "${pharmacyName}"`;
 
     if (products.length === 0) {
         const row = document.createElement('tr');
-        row.innerHTML = '<td colspan="6" class="text-center">Нет товаров в этой аптеке</td>';
+        row.innerHTML = '<td colspan="7" class="text-center">Нет товаров в этой аптеке</td>';
         productsList.appendChild(row);
         return;
     }
@@ -170,6 +221,11 @@ function displayPharmacyProducts(products, pharmacyName) {
             row.classList.add('expired');
         }
         
+        // Получаем ID аптеки из атрибута данных
+        const currentPharmacyId = parseInt(productsList.dataset.pharmacyId);
+        console.log('Using pharmacyId for delete button:', currentPharmacyId);
+        
+        // Создаем базовую структуру строки
         row.innerHTML = `
             <td>${product.id}</td>
             <td>${product.name}</td>
@@ -177,7 +233,25 @@ function displayPharmacyProducts(products, pharmacyName) {
             <td>${product.price.toFixed(2)} руб.</td>
             <td>${product.quantity}</td>
             <td>${formatDate(product.expiry_date)}</td>
+            <td id="delete-cell-${product.id}"></td>
         `;
+        
+        // Создаем кнопку программно
+        const deleteButton = document.createElement('button');
+        deleteButton.className = 'btn btn-sm btn-danger';
+        deleteButton.textContent = 'Удалить';
+        
+        // Добавляем обработчик события
+        deleteButton.addEventListener('click', function() {
+            const pid = product.id;
+            const phid = currentPharmacyId;
+            console.log('Delete button clicked for product ID:', pid, 'pharmacy ID:', phid);
+            deleteProductFromPharmacy(pid, phid);
+        });
+        
+        // Добавляем кнопку в ячейку
+        const deleteCell = row.querySelector(`#delete-cell-${product.id}`);
+        deleteCell.appendChild(deleteButton);
         productsList.appendChild(row);
     });
 }

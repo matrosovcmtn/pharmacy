@@ -123,8 +123,8 @@ def add_product_to_pharmacy(db: Session, product_id: int, pharmacy_id: int, quan
     return 1
 
 
-def remove_product_from_pharmacy(db: Session, product_id: int, pharmacy_id: int) -> bool:
-    """Удалить товар из аптеки"""
+def delete_product_from_pharmacy(db: Session, pharmacy_id: int, product_id: int) -> bool:
+    """Удалить товар из конкретной аптеки"""
     db_product = get_product(db, product_id)
     db_pharmacy = db.query(Pharmacy).filter(Pharmacy.id == pharmacy_id).first()
     
@@ -137,6 +137,12 @@ def remove_product_from_pharmacy(db: Session, product_id: int, pharmacy_id: int)
         return True
     
     return False
+
+
+# Для обратной совместимости
+def remove_product_from_pharmacy(db: Session, product_id: int, pharmacy_id: int) -> bool:
+    """Удалить товар из аптеки (устаревшая функция)"""
+    return delete_product_from_pharmacy(db, pharmacy_id, product_id)
 
 
 def get_total_products_cost(db: Session, pharmacy_id: Optional[int] = None) -> float:
