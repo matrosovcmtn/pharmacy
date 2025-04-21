@@ -123,9 +123,18 @@ function populatePharmacyDropdown(pharmacies) {
 }
 
 // Функция для отображения списка товаров
-function displayProducts(products) {
+async function displayProducts(products) {
     const productList = document.getElementById('productList');
     productList.innerHTML = '';
+
+    // Получаем роль пользователя
+    let userRole = null;
+    try {
+        const user = await getCurrentUser();
+        userRole = user && user.role ? user.role : null;
+    } catch (e) {
+        userRole = null;
+    }
 
     products.forEach(product => {
         const row = document.createElement('tr');
@@ -134,7 +143,10 @@ function displayProducts(products) {
         if (isExpired(product.expiry_date)) {
             row.classList.add('expired');
         }
-        
+        let addToPharmacyBtn = '';
+        if (userRole !== 'supplier') {
+            addToPharmacyBtn = `<button class="btn btn-sm btn-info btn-action" onclick="showAddToPharmacyModal(${product.id})">В аптеку</button>`;
+        }
         row.innerHTML = `
             <td>${product.id}</td>
             <td>${product.name}</td>
@@ -144,15 +156,9 @@ function displayProducts(products) {
             <td>${formatDate(product.expiry_date)}</td>
             <td>${product.preferred_supplier_id ? `ID: ${product.preferred_supplier_id}` : 'Не указан'}</td>
             <td>
-                <button class="btn btn-sm btn-primary btn-action" onclick="editProduct(${product.id})">
-                    Редактировать
-                </button>
-                <button class="btn btn-sm btn-info btn-action" onclick="showAddToPharmacyModal(${product.id})">
-                    В аптеку
-                </button>
-                <button class="btn btn-sm btn-danger btn-action" onclick="deleteProduct(${product.id})">
-                    Удалить
-                </button>
+                <button class="btn btn-sm btn-primary btn-action" onclick="editProduct(${product.id})">Редактировать</button>
+                ${addToPharmacyBtn}
+                <button class="btn btn-sm btn-danger btn-action" onclick="deleteProduct(${product.id})">Удалить</button>
             </td>
         `;
         productList.appendChild(row);

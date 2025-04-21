@@ -6,6 +6,8 @@ from datetime import datetime
 from ...db.database import get_db
 from ...schemas.product import Product, ProductCreate, ProductUpdate, ProductWithSupplier
 from ...services import product as product_service
+from ..deps import check_director_permission
+from ...db.models_auth import User
 
 router = APIRouter()
 
@@ -128,9 +130,10 @@ def add_product_to_pharmacy(
     pharmacy_id: int,
     product_id: int,
     quantity: int,
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
+    current_user: User = Depends(check_director_permission)
 ):
-    """Добавить товар в аптеку"""
+    """Добавить товар в аптеку (только для директоров и администраторов)"""
     result = product_service.add_product_to_pharmacy(
         db, product_id=product_id, pharmacy_id=pharmacy_id, quantity=quantity
     )
@@ -145,9 +148,10 @@ def add_product_to_pharmacy(
 def remove_product_from_pharmacy(
     pharmacy_id: int,
     product_id: int,
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
+    current_user: User = Depends(check_director_permission)
 ):
-    """Удалить товар из аптеки"""
+    """Удалить товар из аптеки (только для директоров и администраторов)"""
     success = product_service.remove_product_from_pharmacy(
         db, product_id=product_id, pharmacy_id=pharmacy_id
     )

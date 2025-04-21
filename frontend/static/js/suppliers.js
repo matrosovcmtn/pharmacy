@@ -54,25 +54,29 @@ async function loadProducts() {
 }
 
 // Функция для отображения списка поставщиков
-function displaySuppliers(suppliers) {
+async function displaySuppliers(suppliers) {
     const supplierList = document.getElementById('supplierList');
     supplierList.innerHTML = '';
+    const user = await getCurrentUser();
 
     suppliers.forEach(supplier => {
         const row = document.createElement('tr');
-        row.innerHTML = `
-            <td>${supplier.id}</td>
-            <td>${supplier.name}</td>
-            <td>
-                <button class="btn btn-sm btn-info btn-action" onclick="viewSupplierProducts(${supplier.id}, '${supplier.name}')">
+        let actions = `<button class="btn btn-sm btn-info btn-action" onclick="viewSupplierProducts(${supplier.id}, '${supplier.name}')">
                     Товары
-                </button>
-                <button class="btn btn-sm btn-primary btn-action" onclick="editSupplier(${supplier.id}, '${supplier.name}')">
+                </button>`;
+        if (user && user.role === 'admin') {
+            actions += ` <button class="btn btn-sm btn-primary btn-action" onclick="editSupplier(${supplier.id}, '${supplier.name}')">
                     Редактировать
                 </button>
                 <button class="btn btn-sm btn-danger btn-action" onclick="deleteSupplier(${supplier.id})">
                     Удалить
-                </button>
+                </button>`;
+        }
+        row.innerHTML = `
+            <td>${supplier.id}</td>
+            <td>${supplier.name}</td>
+            <td>
+                ${actions}
             </td>
         `;
         supplierList.appendChild(row);

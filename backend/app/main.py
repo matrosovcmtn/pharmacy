@@ -82,6 +82,10 @@ async def products(request: Request):
 async def suppliers(request: Request):
     return templates.TemplateResponse("suppliers.html", {"request": request})
 
+@app.get("/admin_pharmacies.html", response_class=HTMLResponse)
+async def admin_pharmacies(request: Request):
+    return templates.TemplateResponse("admin_pharmacies.html", {"request": request})
+
 
 @app.get("/health")
 async def health_check():

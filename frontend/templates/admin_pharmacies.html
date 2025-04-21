@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Управление аптеками и директорами</title>
+    <link rel="stylesheet" href="/static/css/bootstrap.min.css">
+    <link rel="stylesheet" href="/static/css/styles.css">
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+        <div class="container">
+            <a class="navbar-brand" href="/">Система управления аптекой</a>
+        </div>
+    </nav>
+    <div class="container mt-4">
+        <h2>Управление аптеками и директорами</h2>
+        <table class="table table-bordered">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Название аптеки</th>
+                    <th>Директор</th>
+                    <th>Действия</th>
+                </tr>
+            </thead>
+            <tbody id="adminPharmaciesTableBody"></tbody>
+        </table>
+    </div>
+
+    <!-- Модальное окно для назначения директора -->
+    <div class="modal fade" id="assignDirectorModal" tabindex="-1" aria-labelledby="assignDirectorModalLabel" aria-hidden="true">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="assignDirectorModalLabel">Назначить директора аптеке</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body">
+            <input type="hidden" id="assignDirectorPharmacyId" />
+            <div class="mb-3">
+              <label for="assignDirectorSelect" class="form-label">Выберите директора:</label>
+              <select id="assignDirectorSelect" class="form-select"></select>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Отмена</button>
+            <button type="button" class="btn btn-primary" onclick="assignDirectorToPharmacy()">Назначить</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script src="/static/js/bootstrap.bundle.min.js"></script>
+    <script src="/static/js/auth.js"></script>
+    <script src="/static/js/main.js"></script>
+    <script src="/static/js/admin_pharmacies.js"></script>
+</body>
+</html>

@@ -5,6 +5,8 @@ from typing import List
 from ...db.database import get_db
 from ...schemas.supplier import Supplier, SupplierCreate, SupplierUpdate
 from ...services import supplier as supplier_service
+from ..deps import check_admin_permission
+from ...db.models_auth import User
 
 router = APIRouter()
 
@@ -23,9 +25,10 @@ def read_suppliers(
 @router.post("/", response_model=Supplier)
 def create_supplier(
     supplier: SupplierCreate,
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
+    current_user: User = Depends(check_admin_permission)
 ):
-    """Создать нового поставщика"""
+    """Создать нового поставщика (только для администратора)"""
     return supplier_service.create_supplier(db=db, supplier=supplier)
 
 
@@ -45,9 +48,10 @@ def read_supplier(
 def update_supplier(
     supplier_id: int,
     supplier: SupplierUpdate,
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
+    current_user: User = Depends(check_admin_permission)
 ):
-    """Обновить информацию о поставщике"""
+    """Обновить информацию о поставщике (только для администратора)"""
     db_supplier = supplier_service.update_supplier(db, supplier_id=supplier_id, supplier=supplier)
     if db_supplier is None:
         raise HTTPException(status_code=404, detail="Поставщик не найден")

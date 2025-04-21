@@ -16,13 +16,13 @@
             </button>
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav">
-                    <li class="nav-item">
+                    <li class="nav-item" id="pharmacyNavLink" style="display:none;">
                         <a class="nav-link" href="/pharmacy">Аптеки</a>
                     </li>
                     <li class="nav-item">
                         <a class="nav-link" href="/products">Товары</a>
                     </li>
-                    <li class="nav-item">
+                    <li class="nav-item" id="suppliersNavLink" style="display:none;">
                         <a class="nav-link active" href="/suppliers">Поставщики</a>
                     </li>
                 </ul>
@@ -33,7 +33,7 @@
     <div class="container mt-4">
         <h1>Управление поставщиками</h1>
         
-        <div class="row mb-4">
+        <div class="row mb-4" id="addSupplierCard">
             <div class="col-md-12">
                 <div class="card">
                     <div class="card-header">
@@ -45,7 +45,7 @@
                                 <label for="supplierName" class="form-label">Название поставщика</label>
                                 <input type="text" class="form-control" id="supplierName" required>
                             </div>
-                            <button type="submit" class="btn btn-primary">Добавить</button>
+                            <button type="submit" class="btn btn-primary admin-only">Добавить</button>
                         </form>
                     </div>
                 </div>
@@ -96,8 +96,8 @@
                         </form>
                     </div>
                     <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Отмена</button>
-                        <button type="button" class="btn btn-primary" id="saveSupplierChanges">Сохранить</button>
+                        <button type="button" class="btn btn-secondary admin-only" data-bs-dismiss="modal">Отмена</button>
+                        <button type="button" class="btn btn-primary admin-only" id="saveSupplierChanges">Сохранить</button>
                     </div>
                 </div>
             </div>
@@ -133,7 +133,7 @@
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Закрыть</button>
-                        <button type="button" class="btn btn-primary" id="addProductToSupplier">Добавить товар</button>
+                        <button type="button" class="btn btn-primary admin-only" id="addProductToSupplier">Добавить товар</button>
                     </div>
                 </div>
             </div>
@@ -171,8 +171,8 @@
                         </form>
                     </div>
                     <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Отмена</button>
-                        <button type="button" class="btn btn-primary" id="confirmAddProductToSupplier">Добавить</button>
+                        <button type="button" class="btn btn-secondary admin-only" data-bs-dismiss="modal">Отмена</button>
+                        <button type="button" class="btn btn-primary admin-only" id="confirmAddProductToSupplier">Добавить</button>
                     </div>
                 </div>
             </div>

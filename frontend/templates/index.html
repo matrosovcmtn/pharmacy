@@ -19,10 +19,16 @@
                     <li class="nav-item">
                         <a class="nav-link active" href="/">Главная</a>
                     </li>
+                    <li class="nav-item" id="pharmacyNavLink" style="display:none;">
+                        <a class="nav-link" href="/pharmacy">Аптеки</a>
+                    </li>
                     <!-- Остальные пункты меню будут добавлены через JavaScript для авторизованных пользователей -->
                 </ul>
                 <ul class="navbar-nav ms-auto" id="auth-nav">
                     <!-- Эти элементы будут заменены через JavaScript в зависимости от статуса авторизации -->
+                    <li class="nav-item" id="suppliersNavLink" style="display:none;">
+                        <a class="nav-link" href="/suppliers">Поставщики</a>
+                    </li>
                     <li class="nav-item">
                         <a class="nav-link" href="/login">Вход</a>
                     </li>
@@ -55,10 +61,11 @@
             <div id="sections-block">
                 <p>Выберите раздел для работы:</p>
                 <div class="row">
-                <div class="col-md-4 mb-3">
+                <div class="col-md-4 mb-3" id="pharmaciesSection" style="display:none;">
                     <div class="card">
                         <div class="card-body">
                             <h5 class="card-title">Аптеки</h5>
+                            <a href="/admin_pharmacies.html" id="adminPharmaciesLink" class="btn btn-warning mt-2" style="display:none;">Управление аптеками и директорами</a>
                             <p class="card-text">Управление сведениями об аптеках.</p>
                             <a href="/pharmacy" class="btn btn-primary">Перейти</a>
                         </div>
@@ -73,11 +80,11 @@
                         </div>
                     </div>
                 </div>
-                <div class="col-md-4 mb-3">
-                    <div class="card">
+                <div class="col-md-4" id="suppliersSection" style="display:none;">
+                    <div class="card mb-4 box-shadow">
                         <div class="card-body">
                             <h5 class="card-title">Поставщики</h5>
-                            <p class="card-text">Управление поставщиками и их товарами.</p>
+                            <p class="card-text">Просмотр и управление поставщиками.</p>
                             <a href="/suppliers" class="btn btn-primary">Перейти</a>
                         </div>
                     </div>

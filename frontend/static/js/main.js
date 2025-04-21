@@ -50,6 +50,8 @@ function updateHomePageElements() {
     if (window.location.pathname === '/' || window.location.pathname === '/index.html') {
         const authRequiredMessage = document.getElementById('auth-required-message');
         const sectionsBlock = document.getElementById('sections-block');
+        const suppliersNavLink = document.getElementById('suppliersNavLink');
+        const pharmacyNavLink = document.getElementById('pharmacyNavLink');
         
         if (isAuthenticated()) {
             // Для авторизованных пользователей показываем блок с разделами и скрываем сообщение
@@ -60,6 +62,13 @@ function updateHomePageElements() {
             if (sectionsBlock) {
                 sectionsBlock.style.display = 'block';
             }
+            // Явно скрываем вкладки для поставщика
+            getCurrentUser().then(user => {
+                if (user && user.role === 'supplier') {
+                    if (suppliersNavLink) suppliersNavLink.style.display = 'none';
+                    if (pharmacyNavLink) pharmacyNavLink.style.display = 'none';
+                }
+            });
         } else {
             // Для неавторизованных пользователей скрываем блок с разделами и показываем сообщение
             if (authRequiredMessage) {
@@ -69,19 +78,106 @@ function updateHomePageElements() {
             if (sectionsBlock) {
                 sectionsBlock.style.display = 'none';
             }
+            // Для гостей тоже скрываем вкладки
+            if (suppliersNavLink) suppliersNavLink.style.display = 'none';
+            if (pharmacyNavLink) pharmacyNavLink.style.display = 'none';
         }
     }
 }
 
 // Вызываем функцию при загрузке страницы
-document.addEventListener('DOMContentLoaded', function() {
+// Управление доступом к функционалу управления поставщиками
+async function controlSupplierPageAccess() {
+    const user = await getCurrentUser();
+    // Если страница suppliers.html
+    if (window.location.pathname.startsWith('/suppliers')) {
+        if (user && user.role === 'admin') {
+            // Для админа показывать всё
+            document.querySelectorAll('.admin-only').forEach(el => el.style.display = '');
+            const addSupplierCard = document.getElementById('addSupplierCard');
+            if (addSupplierCard) addSupplierCard.style.display = '';
+        } else if (user && user.role === 'director') {
+            // Для директора — только просмотр
+            document.querySelectorAll('.admin-only').forEach(el => el.style.display = 'none');
+            const addSupplierCard = document.getElementById('addSupplierCard');
+            if (addSupplierCard) addSupplierCard.style.display = 'none';
+        } else if (user && user.role === 'supplier') {
+            // Для поставщика вообще редирект
+            window.location.href = '/';
+            return;
+        } else {
+            // Для неавторизованных и других ролей — скрыть управление
+            document.querySelectorAll('.admin-only').forEach(el => el.style.display = 'none');
+            const addSupplierCard = document.getElementById('addSupplierCard');
+            if (addSupplierCard) addSupplierCard.style.display = 'none';
+        }
+    }
+}
+
+document.addEventListener('DOMContentLoaded', async function() {
+    await controlSupplierPageAccess();
+    // Управление видимостью вкладки "Поставщики" и раздела на главной
+    const suppliersNavLink = document.getElementById('suppliersNavLink');
+    const pharmacyNavLink = document.getElementById('pharmacyNavLink');
+    const suppliersSection = document.getElementById('suppliersSection');
+    const pharmaciesSection = document.getElementById('pharmaciesSection');
+    try {
+        const user = await getCurrentUser();
+        // Показываем вкладки "Аптеки" и "Поставщики" только для admin и director, для supplier и гостей скрываем
+        if (suppliersNavLink) {
+            if (user && (user.role === 'admin' || user.role === 'director')) {
+                suppliersNavLink.style.display = 'list-item';
+            } else {
+                suppliersNavLink.style.display = 'none';
+            }
+        }
+        if (pharmacyNavLink) {
+            if (user && (user.role === 'admin' || user.role === 'director')) {
+                pharmacyNavLink.style.display = 'list-item';
+            } else {
+                pharmacyNavLink.style.display = 'none';
+            }
+        }
+        // Раздел "Поставщики" на главной только для admin
+        if (suppliersSection) {
+            if (user && user.role === 'admin') {
+                suppliersSection.style.display = '';
+            } else {
+                suppliersSection.style.display = 'none';
+            }
+        }
+        // Раздел "Аптеки" на главной только для admin и director
+        if (pharmaciesSection) {
+            if (user && (user.role === 'admin' || user.role === 'director')) {
+                pharmaciesSection.style.display = '';
+            } else {
+                pharmaciesSection.style.display = 'none';
+            }
+        }
+    } catch (e) {
+        if (suppliersNavLink) suppliersNavLink.style.display = 'none';
+        if (pharmacyNavLink) pharmacyNavLink.style.display = 'none';
+        if (suppliersSection) suppliersSection.style.display = 'none';
+        if (pharmaciesSection) pharmaciesSection.style.display = 'none';
+    }
+
     // Проверяем, есть ли функция updateNavMenu (из auth.js)
     if (typeof updateNavMenu === 'function') {
         updateNavMenu();
     }
     
-    // Обновляем элементы на главной странице
     updateHomePageElements();
+
+    // Показываем ссылку на управление аптеками только для администратора
+    if (window.location.pathname === '/' || window.location.pathname === '/index.html') {
+        try {
+            const user = await getCurrentUser();
+            const adminLink = document.getElementById('adminPharmaciesLink');
+            if (user && user.role === 'admin' && adminLink) {
+                adminLink.style.display = 'inline-block';
+            }
+        } catch (e) {}
+    }
 });
 
 // Функция для обработки ошибок API

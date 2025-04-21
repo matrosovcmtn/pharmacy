@@ -8,6 +8,7 @@ from ...db.models_auth import User
 from ...schemas.pharmacy import Pharmacy, PharmacyCreate, PharmacyUpdate
 from ...services import pharmacy as pharmacy_service
 from ..deps import get_current_active_user, check_director_permission, check_admin_permission
+from ...db.models_auth import UserRole
 
 router = APIRouter()
 
@@ -20,7 +21,7 @@ def read_pharmacies(
     current_user: User = Depends(get_current_active_user)
 ):
     """Получить список всех аптек"""
-    pharmacies = pharmacy_service.get_pharmacies(db, skip=skip, limit=limit)
+    pharmacies = pharmacy_service.get_pharmacies(db, current_user=current_user, skip=skip, limit=limit)
     return pharmacies
 
 
@@ -31,7 +32,7 @@ def create_pharmacy(
     current_user: User = Depends(check_director_permission)
 ):
     """Создать новую аптеку (только для директоров и администраторов)"""
-    return pharmacy_service.create_pharmacy(db=db, pharmacy=pharmacy)
+    return pharmacy_service.create_pharmacy(db=db, pharmacy=pharmacy, current_user=current_user)
 
 
 @router.get("/{pharmacy_id}", response_model=Pharmacy)
@@ -55,9 +56,9 @@ def update_pharmacy(
     current_user: User = Depends(check_director_permission)
 ):
     """Обновить информацию об аптеке (только для директоров и администраторов)"""
-    db_pharmacy = pharmacy_service.update_pharmacy(db, pharmacy_id=pharmacy_id, pharmacy=pharmacy)
+    db_pharmacy = pharmacy_service.update_pharmacy(db, pharmacy_id=pharmacy_id, pharmacy=pharmacy, current_user=current_user)
     if db_pharmacy is None:
-        raise HTTPException(status_code=404, detail="Аптека не найдена")
+        raise HTTPException(status_code=404, detail="Аптека не найдена или нет доступа")
     return db_pharmacy
 
 
@@ -65,14 +66,48 @@ def update_pharmacy(
 def delete_pharmacy(
     pharmacy_id: int,
     db: Session = Depends(get_db),
-    current_user: User = Depends(check_admin_permission)
+    current_user: User = Depends(get_current_active_user)
 ):
-    """Удалить аптеку (только для администраторов)"""
-    success = pharmacy_service.delete_pharmacy(db, pharmacy_id=pharmacy_id)
+    """Удалить аптеку (директор может только свою, админ — любую)"""
+    success = pharmacy_service.delete_pharmacy(db, pharmacy_id=pharmacy_id, current_user=current_user)
     if not success:
-        raise HTTPException(status_code=404, detail="Аптека не найдена")
+        raise HTTPException(status_code=404, detail="Аптека не найдена или нет доступа")
     return {"detail": "Аптека успешно удалена"}
 
+
+@router.patch("/{pharmacy_id}/assign-director")
+def assign_director_to_pharmacy(
+    pharmacy_id: int,
+    director_id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(check_admin_permission)
+):
+    """Назначить директору аптеку (только для админов)"""
+    pharmacy = pharmacy_service.get_pharmacy(db, pharmacy_id)
+    if not pharmacy:
+        raise HTTPException(status_code=404, detail="Аптека не найдена")
+    director = db.query(User).filter(User.id == director_id, User.role == UserRole.DIRECTOR).first()
+    if not director:
+        raise HTTPException(status_code=404, detail="Директор не найден")
+    pharmacy.director_id = director_id
+    db.commit()
+    db.refresh(pharmacy)
+    return pharmacy
+
+@router.patch("/{pharmacy_id}/unassign-director")
+def unassign_director_from_pharmacy(
+    pharmacy_id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(check_admin_permission)
+):
+    """Отвязать аптеку от директора (только для админов)"""
+    pharmacy = pharmacy_service.get_pharmacy(db, pharmacy_id)
+    if not pharmacy:
+        raise HTTPException(status_code=404, detail="Аптека не найдена")
+    pharmacy.director_id = None
+    db.commit()
+    db.refresh(pharmacy)
+    return pharmacy
 
 @router.put("/{pharmacy_id}/date", response_model=Pharmacy)
 def update_pharmacy_date(

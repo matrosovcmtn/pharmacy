@@ -82,8 +82,59 @@ def init_db(db) -> None:
     """
     logger.info("Инициализация базы данных...")
     
-    # Создание аптек
-    for pharmacy_data in INITIAL_PHARMACIES:
+        # Сначала создаём пользователей (админа, директора, поставщика)
+    admin_exists = db.query(User).filter(User.email == "admin@pharmacy.com").first()
+    if not admin_exists:
+        logger.info("Создание администратора по умолчанию...")
+        hashed_password = get_password_hash("admin123")
+        admin_user = User(
+            email="admin@pharmacy.com",
+            username="admin",
+            hashed_password=hashed_password,
+            role=UserRole.ADMIN,
+            is_active=True
+        )
+        db.add(admin_user)
+
+    director1_exists = db.query(User).filter(User.email == "director@pharmacy.com").first()
+    if not director1_exists:
+        logger.info("Создание первого директора по умолчанию...")
+        hashed_password = get_password_hash("director123")
+        director1_user = User(
+            email="director@pharmacy.com",
+            username="director",
+            hashed_password=hashed_password,
+            role=UserRole.DIRECTOR,
+            is_active=True
+        )
+        db.add(director1_user)
+
+    director2_exists = db.query(User).filter(User.email == "director2@pharmacy.com").first()
+    if not director2_exists:
+        logger.info("Создание второго директора...")
+        hashed_password = get_password_hash("director2")
+        director2_user = User(
+            email="director2@pharmacy.com",
+            username="director2",
+            hashed_password=hashed_password,
+            role=UserRole.DIRECTOR,
+            is_active=True
+        )
+        db.add(director2_user)
+    db.commit()
+
+    # Получаем id директоров
+    director1 = db.query(User).filter(User.email == "director@pharmacy.com").first()
+    director2 = db.query(User).filter(User.email == "director2@pharmacy.com").first()
+    director1_id = director1.id if director1 else 1
+    director2_id = director2.id if director2 else 2
+
+    # Назначаем первые две аптеки второму директору, остальные — первому
+    for idx, pharmacy_data in enumerate(INITIAL_PHARMACIES):
+        if idx < 2:
+            pharmacy_data["director_id"] = director2_id
+        else:
+            pharmacy_data["director_id"] = director1_id
         pharmacy = Pharmacy(**pharmacy_data)
         db.add(pharmacy)
     
@@ -110,34 +161,6 @@ def init_db(db) -> None:
         
         db.add(product)
     
-    # Создание администратора по умолчанию
-    admin_exists = db.query(User).filter(User.email == "admin@pharmacy.com").first()
-    if not admin_exists:
-        logger.info("Создание администратора по умолчанию...")
-        hashed_password = get_password_hash("admin123")
-        admin_user = User(
-            email="admin@pharmacy.com",
-            username="admin",
-            hashed_password=hashed_password,
-            role=UserRole.ADMIN,
-            is_active=True
-        )
-        db.add(admin_user)
-        
-    # Создание директора по умолчанию
-    director_exists = db.query(User).filter(User.email == "director@pharmacy.com").first()
-    if not director_exists:
-        logger.info("Создание директора по умолчанию...")
-        hashed_password = get_password_hash("director123")
-        director_user = User(
-            email="director@pharmacy.com",
-            username="director",
-            hashed_password=hashed_password,
-            role=UserRole.DIRECTOR,
-            is_active=True
-        )
-        db.add(director_user)
-        
     # Создание поставщика по умолчанию
     supplier_exists = db.query(User).filter(User.email == "supplier@pharmacy.com").first()
     if not supplier_exists:

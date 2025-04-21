@@ -5,6 +5,7 @@ from typing import List, Optional
 
 class PharmacyBase(BaseModel):
     name: str
+    director_id: Optional[int] = None
 
 
 class PharmacyCreate(PharmacyBase):
@@ -14,6 +15,7 @@ class PharmacyCreate(PharmacyBase):
 class PharmacyUpdate(PharmacyBase):
     name: Optional[str] = None
     current_date: Optional[datetime] = None
+    director_id: Optional[int] = None
 
 
 class PharmacyInDB(PharmacyBase):

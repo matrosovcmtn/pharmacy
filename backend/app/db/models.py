@@ -31,9 +31,11 @@ class Pharmacy(Base):
     id = Column(Integer, primary_key=True, index=True)
     name = Column(String, index=True)
     current_date = Column(DateTime, default=datetime.datetime.now)
+    director_id = Column(Integer, ForeignKey('users.id'), nullable=True)
     
     # Отношения
     products = relationship("Product", secondary=pharmacy_product, back_populates="pharmacies")
+    director = relationship("User", foreign_keys=[director_id])
 
 
 class Product(Base):
