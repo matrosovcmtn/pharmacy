@@ -1,7 +1,56 @@
 // JavaScript для страницы управления товарами
 
-document.addEventListener('DOMContentLoaded', function() {
-    // Загрузка списка товаров и поставщиков при загрузке страницы
+document.addEventListener('DOMContentLoaded', async function() {
+    // Получаем роль пользователя
+    let userRole = null;
+    try {
+        const user = await getCurrentUser();
+        userRole = user && user.role ? user.role.toLowerCase() : null;
+    } catch (e) {
+        userRole = null;
+    }
+
+    // Фильтр по поставщику только для директора
+    if (userRole === 'director') {
+        // Показываем фильтр по поставщику
+        const supplierFilterBlock = document.getElementById('supplierFilterBlock');
+        if (supplierFilterBlock) supplierFilterBlock.style.display = '';
+        // Загрузка списка поставщиков для фильтра
+        await loadSuppliersForFilter();
+        // Обработчик выбора поставщика
+        const supplierFilter = document.getElementById('supplierFilter');
+        if (supplierFilter) {
+            supplierFilter.addEventListener('change', function() {
+                const supplierId = supplierFilter.value;
+                if (supplierId) {
+                    loadProductsBySupplier(supplierId);
+                } else {
+                    loadProducts();
+                }
+            });
+        }
+    } else if (userRole === 'supplier') {
+        // Скрываем фильтр для поставщика
+        const supplierFilterBlock = document.getElementById('supplierFilterBlock');
+        if (supplierFilterBlock) supplierFilterBlock.style.display = 'none';
+    } else {
+        // Для админа и других ролей — фильтр виден
+        const supplierFilterBlock = document.getElementById('supplierFilterBlock');
+        if (supplierFilterBlock) supplierFilterBlock.style.display = '';
+        await loadSuppliersForFilter();
+        const supplierFilter = document.getElementById('supplierFilter');
+        if (supplierFilter) {
+            supplierFilter.addEventListener('change', function() {
+                const supplierId = supplierFilter.value;
+                if (supplierId) {
+                    loadProductsBySupplier(supplierId);
+                } else {
+                    loadProducts();
+                }
+            });
+        }
+    }
+
     loadProducts();
     loadSuppliers();
     loadTotalCost();
@@ -32,6 +81,35 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 });
 
+// Функция для загрузки товаров по поставщику
+async function loadProductsBySupplier(supplierId) {
+    try {
+        const products = await apiGet(`/products/supplier/${supplierId}`);
+        displayProducts(products);
+    } catch (error) {
+        console.error('Error loading products by supplier:', error);
+    }
+}
+
+// Функция для загрузки списка поставщиков для фильтра
+async function loadSuppliersForFilter() {
+    try {
+        const suppliers = await apiGet('/suppliers/');
+        const supplierFilter = document.getElementById('supplierFilter');
+        if (supplierFilter) {
+            supplierFilter.innerHTML = '<option value="">Все поставщики</option>';
+            suppliers.forEach(supplier => {
+                const option = document.createElement('option');
+                option.value = supplier.id;
+                option.textContent = supplier.name;
+                supplierFilter.appendChild(option);
+            });
+        }
+    } catch (error) {
+        console.error('Error loading suppliers for filter:', error);
+    }
+}
+
 // Функция для загрузки списка товаров
 async function loadProducts() {
     try {
@@ -41,6 +119,7 @@ async function loadProducts() {
         console.error('Error loading products:', error);
     }
 }
+
 
 // Функция для загрузки просроченных товаров
 async function loadExpiredProducts() {
@@ -131,10 +210,12 @@ async function displayProducts(products) {
     let userRole = null;
     try {
         const user = await getCurrentUser();
-        userRole = user && user.role ? user.role : null;
+        userRole = user && user.role ? user.role.toLowerCase() : null;
     } catch (e) {
         userRole = null;
     }
+    console.log('displayProducts: userRole =', userRole);
+    console.log('displayProducts: products =', products);
 
     products.forEach(product => {
         const row = document.createElement('tr');
@@ -156,9 +237,9 @@ async function displayProducts(products) {
             <td>${formatDate(product.expiry_date)}</td>
             <td>${product.preferred_supplier_id ? `ID: ${product.preferred_supplier_id}` : 'Не указан'}</td>
             <td>
-                <button class="btn btn-sm btn-primary btn-action" onclick="editProduct(${product.id})">Редактировать</button>
+                ${(userRole === 'admin') ? `<button class="btn btn-sm btn-primary btn-action" onclick="editProduct(${product.id})">Редактировать</button>` : ''}
                 ${addToPharmacyBtn}
-                <button class="btn btn-sm btn-danger btn-action" onclick="deleteProduct(${product.id})">Удалить</button>
+                ${(userRole === 'admin') ? `<button class="btn btn-sm btn-danger btn-action" onclick="deleteProduct(${product.id})">Удалить</button>` : ''}
             </td>
         `;
         productList.appendChild(row);

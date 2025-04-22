@@ -60,6 +60,8 @@ class Supplier(Base):
 
     id = Column(Integer, primary_key=True, index=True)
     name = Column(String, index=True)
+    user_id = Column(Integer, ForeignKey('users.id'), unique=True, nullable=True)
     
     # Отношения
     products = relationship("Product", secondary=supplier_product, back_populates="suppliers")
+    user = relationship("User", foreign_keys=[user_id])

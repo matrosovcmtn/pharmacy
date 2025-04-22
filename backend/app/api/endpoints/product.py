@@ -8,18 +8,30 @@ from ...schemas.product import Product, ProductCreate, ProductUpdate, ProductWit
 from ...services import product as product_service
 from ..deps import check_director_permission
 from ...db.models_auth import User
+from ...db.models import Supplier
 
 router = APIRouter()
 
+
+from ..deps import get_current_active_user
 
 @router.get("/", response_model=List[Product])
 def read_products(
     skip: int = Query(0, description="Количество записей для пропуска"),
     limit: int = Query(100, description="Максимальное количество записей для возврата"),
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_active_user)
 ):
-    """Получить список всех товаров"""
-    products = product_service.get_products(db, skip=skip, limit=limit)
+    """Получить список всех товаров (для поставщика — только свои)"""
+    if current_user.role.lower() == 'supplier':
+        # Получаем supplier_id, связанный с этим пользователем
+        supplier = db.query(Supplier).filter(Supplier.user_id == current_user.id).first()
+        if supplier:
+            products = product_service.get_products_by_supplier(db, supplier_id=supplier.id)
+        else:
+            products = []
+    else:
+        products = product_service.get_products(db, skip=skip, limit=limit)
     return products
 
 

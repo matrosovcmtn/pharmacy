@@ -1,6 +1,11 @@
 // JavaScript для страницы управления аптеками
 
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', async function() {
+    const user = await getCurrentUser();
+    if (user && user.role && user.role.toLowerCase() === 'supplier') {
+        window.location.href = '/';
+        return;
+    }
     // Загрузка списка аптек при загрузке страницы
     loadPharmacies();
 
@@ -214,44 +219,54 @@ function displayPharmacyProducts(products, pharmacyName, pharmacyId) {
         return;
     }
 
-    products.forEach(product => {
-        const row = document.createElement('tr');
-        // Добавляем класс для просроченных товаров
-        if (isExpired(product.expiry_date)) {
-            row.classList.add('expired');
+    (async () => {
+        // Получаем роль пользователя и id пользователя
+        let userRole = null;
+        let userId = null;
+        try {
+            const user = await getCurrentUser();
+            userRole = user && user.role ? user.role : null;
+            userId = user && user.id ? user.id : null;
+        } catch (e) {
+            userRole = null;
+            userId = null;
         }
-        
-        // Получаем ID аптеки из атрибута данных
-        const currentPharmacyId = parseInt(productsList.dataset.pharmacyId);
-        console.log('Using pharmacyId for delete button:', currentPharmacyId);
-        
-        // Создаем базовую структуру строки
-        row.innerHTML = `
-            <td>${product.id}</td>
-            <td>${product.name}</td>
-            <td>${product.dosages.join(', ')}</td>
-            <td>${product.price.toFixed(2)} руб.</td>
-            <td>${product.quantity}</td>
-            <td>${formatDate(product.expiry_date)}</td>
-            <td id="delete-cell-${product.id}"></td>
-        `;
-        
-        // Создаем кнопку программно
-        const deleteButton = document.createElement('button');
-        deleteButton.className = 'btn btn-sm btn-danger';
-        deleteButton.textContent = 'Удалить';
-        
-        // Добавляем обработчик события
-        deleteButton.addEventListener('click', function() {
-            const pid = product.id;
-            const phid = currentPharmacyId;
-            console.log('Delete button clicked for product ID:', pid, 'pharmacy ID:', phid);
-            deleteProductFromPharmacy(pid, phid);
+
+        products.forEach(product => {
+            const row = document.createElement('tr');
+            // Добавляем класс для просроченных товаров
+            if (isExpired(product.expiry_date)) {
+                row.classList.add('expired');
+            }
+            
+            // Получаем ID аптеки из атрибута данных
+            const currentPharmacyId = parseInt(productsList.dataset.pharmacyId);
+            
+            // Создаем базовую структуру строки
+            row.innerHTML = `
+                <td>${product.id}</td>
+                <td>${product.name}</td>
+                <td>${product.dosages.join(', ')}</td>
+                <td>${product.price.toFixed(2)} руб.</td>
+                <td>${product.quantity}</td>
+                <td>${formatDate(product.expiry_date)}</td>
+                <td id="delete-cell-${product.id}"></td>
+            `;
+            
+            // Кнопка удаления только для директора, если он владелец аптеки
+            if (userRole === 'director' && product.pharmacy_director_id === userId) {
+                const deleteButton = document.createElement('button');
+                deleteButton.className = 'btn btn-sm btn-danger';
+                deleteButton.textContent = 'Удалить';
+                deleteButton.addEventListener('click', function() {
+                    const pid = product.id;
+                    const phid = currentPharmacyId;
+                    deleteProductFromPharmacy(pid, phid);
+                });
+                const deleteCell = row.querySelector(`#delete-cell-${product.id}`);
+                deleteCell.appendChild(deleteButton);
+            }
+            productsList.appendChild(row);
         });
-        
-        // Добавляем кнопку в ячейку
-        const deleteCell = row.querySelector(`#delete-cell-${product.id}`);
-        deleteCell.appendChild(deleteButton);
-        productsList.appendChild(row);
-    });
+    })();
 }

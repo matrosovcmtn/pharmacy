@@ -50,8 +50,6 @@ function updateHomePageElements() {
     if (window.location.pathname === '/' || window.location.pathname === '/index.html') {
         const authRequiredMessage = document.getElementById('auth-required-message');
         const sectionsBlock = document.getElementById('sections-block');
-        const suppliersNavLink = document.getElementById('suppliersNavLink');
-        const pharmacyNavLink = document.getElementById('pharmacyNavLink');
         
         if (isAuthenticated()) {
             // Для авторизованных пользователей показываем блок с разделами и скрываем сообщение
@@ -62,13 +60,6 @@ function updateHomePageElements() {
             if (sectionsBlock) {
                 sectionsBlock.style.display = 'block';
             }
-            // Явно скрываем вкладки для поставщика
-            getCurrentUser().then(user => {
-                if (user && user.role === 'supplier') {
-                    if (suppliersNavLink) suppliersNavLink.style.display = 'none';
-                    if (pharmacyNavLink) pharmacyNavLink.style.display = 'none';
-                }
-            });
         } else {
             // Для неавторизованных пользователей скрываем блок с разделами и показываем сообщение
             if (authRequiredMessage) {
@@ -78,9 +69,6 @@ function updateHomePageElements() {
             if (sectionsBlock) {
                 sectionsBlock.style.display = 'none';
             }
-            // Для гостей тоже скрываем вкладки
-            if (suppliersNavLink) suppliersNavLink.style.display = 'none';
-            if (pharmacyNavLink) pharmacyNavLink.style.display = 'none';
         }
     }
 }
@@ -124,8 +112,9 @@ document.addEventListener('DOMContentLoaded', async function() {
     try {
         const user = await getCurrentUser();
         // Показываем вкладки "Аптеки" и "Поставщики" только для admin и director, для supplier и гостей скрываем
+        // Вкладка "Поставщики" видна только администратору
         if (suppliersNavLink) {
-            if (user && (user.role === 'admin' || user.role === 'director')) {
+            if (user && user.role === 'admin') {
                 suppliersNavLink.style.display = 'list-item';
             } else {
                 suppliersNavLink.style.display = 'none';
@@ -153,6 +142,13 @@ document.addEventListener('DOMContentLoaded', async function() {
             } else {
                 pharmaciesSection.style.display = 'none';
             }
+        }
+        // Явно скрываем вкладки для supplier и гостей (на всякий случай)
+        if (suppliersNavLink && (!user || user.role === 'supplier')) {
+            suppliersNavLink.style.display = 'none';
+        }
+        if (pharmacyNavLink && (!user || user.role === 'supplier')) {
+            pharmacyNavLink.style.display = 'none';
         }
     } catch (e) {
         if (suppliersNavLink) suppliersNavLink.style.display = 'none';

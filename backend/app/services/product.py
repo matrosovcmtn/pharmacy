@@ -72,7 +72,7 @@ def get_products_by_pharmacy(db: Session, pharmacy_id: int) -> List[Product]:
 
 def get_products_by_supplier(db: Session, supplier_id: int) -> List[Product]:
     """Получить список товаров у конкретного поставщика"""
-    return db.query(Product).join(Product.suppliers).filter(Supplier.id == supplier_id).all()
+    return db.query(Product).filter(Product.preferred_supplier_id == supplier_id).all()
 
 
 def get_products_by_dosage(db: Session, dosage: str) -> List[Product]:
@@ -101,6 +101,11 @@ def add_product_to_pharmacy(db: Session, product_id: int, pharmacy_id: int, quan
     # Проверяем, что количество не превышает доступное
     if quantity > db_product.quantity:
         return -1  # Недостаточно товара в наличии
+
+    # Уменьшаем остаток товара у поставщика
+    db_product.quantity -= quantity
+    if db_product.quantity < 0:
+        db_product.quantity = 0
     
     # Проверяем, есть ли уже этот товар в аптеке
     product_exists = False

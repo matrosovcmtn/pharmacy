@@ -11,8 +11,9 @@ def get_supplier(db: Session, supplier_id: int) -> Optional[Supplier]:
 
 
 def get_suppliers(db: Session, skip: int = 0, limit: int = 100) -> List[Supplier]:
-    """Получить список поставщиков с пагинацией"""
-    return db.query(Supplier).offset(skip).limit(limit).all()
+    """Получить список поставщиков, у которых есть связанный пользователь с ролью 'поставщик' (SUPPLIER)"""
+    from ..db.models_auth import User, UserRole
+    return db.query(Supplier).join(User, Supplier.user_id == User.id).filter(User.role == UserRole.SUPPLIER).offset(skip).limit(limit).all()
 
 
 def create_supplier(db: Session, supplier: SupplierCreate) -> Supplier:

@@ -1,6 +1,12 @@
 // JavaScript для страницы управления поставщиками
 
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', async function() {
+    const user = await getCurrentUser();
+    if (!user || user.role.toLowerCase() !== 'admin') {
+        alert('У вас недостаточно прав для просмотра этой страницы.');
+        window.location.href = '/';
+        return;
+    }
     // Загрузка списка поставщиков при загрузке страницы
     loadSuppliers();
 
