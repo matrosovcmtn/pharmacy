@@ -1,11 +1,6 @@
 // JavaScript для страницы управления аптеками
 
-document.addEventListener('DOMContentLoaded', async function() {
-    const user = await getCurrentUser();
-    if (user && user.role && user.role.toLowerCase() === 'supplier') {
-        window.location.href = '/';
-        return;
-    }
+document.addEventListener('DOMContentLoaded', function() {
     // Загрузка списка аптек при загрузке страницы
     loadPharmacies();
 
@@ -248,7 +243,7 @@ function displayPharmacyProducts(products, pharmacyName, pharmacyId) {
                 <td>${product.name}</td>
                 <td>${product.dosages.join(', ')}</td>
                 <td>${product.price.toFixed(2)} руб.</td>
-                <td>${product.quantity}</td>
+                <td>${product.quantity_in_pharmacy}</td>
                 <td>${formatDate(product.expiry_date)}</td>
                 <td id="delete-cell-${product.id}"></td>
             `;

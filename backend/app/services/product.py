@@ -65,9 +65,31 @@ def get_expired_products(db: Session, pharmacy_id: Optional[int] = None, current
     return query.all()
 
 
-def get_products_by_pharmacy(db: Session, pharmacy_id: int) -> List[Product]:
-    """Получить список товаров в конкретной аптеке"""
-    return db.query(Product).join(Product.pharmacies).filter(Pharmacy.id == pharmacy_id).all()
+from ..schemas.product_in_pharmacy import ProductInPharmacy
+
+def get_products_by_pharmacy(db: Session, pharmacy_id: int) -> list:
+    """Получить список товаров в конкретной аптеке с количеством из pharmacy_product"""
+    rows = db.execute(
+        text("""
+            SELECT p.id, p.name, p.dosages, p.price, p.expiry_date, pp.quantity
+            FROM products p
+            JOIN pharmacy_product pp ON pp.product_id = p.id
+            WHERE pp.pharmacy_id = :pharmacy_id
+        """),
+        {"pharmacy_id": pharmacy_id}
+    ).fetchall()
+    result = []
+    for row in rows:
+        result.append(ProductInPharmacy(
+            id=row.id,
+            name=row.name,
+            dosages=row.dosages,
+            price=row.price,
+            expiry_date=row.expiry_date,
+            quantity_in_pharmacy=row.quantity
+        ))
+    return result
+
 
 
 def get_products_by_supplier(db: Session, supplier_id: int) -> List[Product]:
@@ -120,7 +142,7 @@ def add_product_to_pharmacy(db: Session, product_id: int, pharmacy_id: int, quan
     
     # Обновляем количество в таблице связи
     db.execute(
-        text("UPDATE pharmacy_product SET quantity = :quantity WHERE pharmacy_id = :pharmacy_id AND product_id = :product_id"),
+        text("UPDATE pharmacy_product SET quantity = quantity + :quantity WHERE pharmacy_id = :pharmacy_id AND product_id = :product_id"),
         {"quantity": quantity, "pharmacy_id": pharmacy_id, "product_id": product_id}
     )
     

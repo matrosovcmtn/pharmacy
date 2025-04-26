@@ -3,7 +3,7 @@ from sqlalchemy.orm import Session
 from typing import List
 
 from ...db.database import get_db
-from ...schemas.supplier import Supplier, SupplierCreate, SupplierUpdate, SupplierWithLogin
+from ...schemas.supplier import Supplier, SupplierCreate, SupplierUpdate
 from ...services import supplier as supplier_service
 from ..deps import check_admin_permission
 from ...db.models_auth import User
@@ -11,25 +11,15 @@ from ...db.models_auth import User
 router = APIRouter()
 
 
-@router.get("/", response_model=List[SupplierWithLogin])
+@router.get("/", response_model=List[Supplier])
 def read_suppliers(
     skip: int = Query(0, description="Количество записей для пропуска"),
     limit: int = Query(100, description="Максимальное количество записей для возврата"),
     db: Session = Depends(get_db)
 ):
-    """Получить список всех поставщиков c логином (email)"""
+    """Получить список всех поставщиков"""
     suppliers = supplier_service.get_suppliers(db, skip=skip, limit=limit)
-    # Each supplier has a .user relationship, which has an email
-    result = []
-    for supplier in suppliers:
-        login = supplier.user.email if supplier.user else ''
-        supplier_with_login = SupplierWithLogin(
-            id=supplier.id,
-            name=supplier.name,
-            login=login
-        )
-        result.append(supplier_with_login)
-    return result
+    return suppliers
 
 
 @router.post("/", response_model=Supplier)

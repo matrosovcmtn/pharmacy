@@ -8,7 +8,6 @@ from ...schemas.product import Product, ProductCreate, ProductUpdate, ProductWit
 from ...services import product as product_service
 from ..deps import check_director_permission
 from ...db.models_auth import User
-from ...db.models import Supplier
 
 router = APIRouter()
 
@@ -23,7 +22,7 @@ def read_products(
     current_user: User = Depends(get_current_active_user)
 ):
     """Получить список всех товаров (для поставщика — только свои)"""
-    if current_user.role.lower() == 'supplier':
+    if current_user.role == 'supplier':
         # Получаем supplier_id, связанный с этим пользователем
         supplier = db.query(Supplier).filter(Supplier.user_id == current_user.id).first()
         if supplier:
@@ -94,12 +93,14 @@ def read_expired_products(
     return expired_products
 
 
-@router.get("/pharmacy/{pharmacy_id}", response_model=List[Product])
+from ...schemas.product_in_pharmacy import ProductInPharmacy
+
+@router.get("/pharmacy/{pharmacy_id}", response_model=List[ProductInPharmacy])
 def read_products_by_pharmacy(
     pharmacy_id: int,
     db: Session = Depends(get_db)
 ):
-    """Получить список товаров в конкретной аптеке"""
+    """Получить список товаров в конкретной аптеке (с количеством из pharmacy_product)"""
     products = product_service.get_products_by_pharmacy(db, pharmacy_id=pharmacy_id)
     return products
 

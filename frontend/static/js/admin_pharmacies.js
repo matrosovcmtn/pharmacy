@@ -1,9 +1,8 @@
 // JS для управления аптеками и директорами (только для администратора)
 document.addEventListener('DOMContentLoaded', async function() {
     const user = await getCurrentUser();
-    if (!user || user.role.toLowerCase() !== 'admin') {
-        alert('У вас недостаточно прав для просмотра этой страницы.');
-        window.location.href = '/';
+    if (!user || user.role !== 'admin') {
+        document.getElementById('adminPharmaciesSection').style.display = 'none';
         return;
     }
     loadAdminPharmacies();

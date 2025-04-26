@@ -1,10 +1,10 @@
 // JavaScript для страницы управления поставщиками
 
 document.addEventListener('DOMContentLoaded', async function() {
+    // Проверка роли пользователя
     const user = await getCurrentUser();
-    if (!user || user.role.toLowerCase() !== 'admin') {
-        alert('У вас недостаточно прав для просмотра этой страницы.');
-        window.location.href = '/';
+    if (user && user.role === 'director') {
+        window.location = '/';
         return;
     }
     // Загрузка списка поставщиков при загрузке страницы

@@ -15,8 +15,27 @@
                 <span class="navbar-toggler-icon"></span>
             </button>
             <div class="collapse navbar-collapse" id="navbarNav">
-                <ul class="navbar-nav" id="main-nav"></ul>
-<ul class="navbar-nav ms-auto" id="auth-nav"></ul>
+                <ul class="navbar-nav" id="main-nav">
+                    <li class="nav-item">
+                        <a class="nav-link active" href="/">Главная</a>
+                    </li>
+                    <li class="nav-item" id="pharmacyNavLink" style="display:none;">
+                        <a class="nav-link" href="/pharmacy">Аптеки</a>
+                    </li>
+                    <!-- Остальные пункты меню будут добавлены через JavaScript для авторизованных пользователей -->
+                </ul>
+                <ul class="navbar-nav ms-auto" id="auth-nav">
+                    <!-- Эти элементы будут заменены через JavaScript в зависимости от статуса авторизации -->
+                    <li class="nav-item" id="suppliersNavLink" style="display:none;">
+                        <a class="nav-link" href="/suppliers">Поставщики</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/login">Вход</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/register">Регистрация</a>
+                    </li>
+                </ul>
             </div>
         </div>
     </nav>
@@ -84,9 +103,5 @@
     <script src="/static/js/bootstrap.bundle.min.js"></script>
     <script src="/static/js/auth.js"></script>
     <script src="/static/js/main.js"></script>
-    <script src="/static/js/navbar.js"></script>
-<script src="/static/js/bootstrap.bundle.min.js"></script>
-<script src="/static/js/auth.js"></script>
-<script src="/static/js/navbar.js"></script>
 </body>
 </html>

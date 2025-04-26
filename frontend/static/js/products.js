@@ -5,7 +5,7 @@ document.addEventListener('DOMContentLoaded', async function() {
     let userRole = null;
     try {
         const user = await getCurrentUser();
-        userRole = user && user.role ? user.role.toLowerCase() : null;
+        userRole = user && user.role ? user.role : null;
     } catch (e) {
         userRole = null;
     }
@@ -210,12 +210,10 @@ async function displayProducts(products) {
     let userRole = null;
     try {
         const user = await getCurrentUser();
-        userRole = user && user.role ? user.role.toLowerCase() : null;
+        userRole = user && user.role ? user.role : null;
     } catch (e) {
         userRole = null;
     }
-    console.log('displayProducts: userRole =', userRole);
-    console.log('displayProducts: products =', products);
 
     products.forEach(product => {
         const row = document.createElement('tr');
