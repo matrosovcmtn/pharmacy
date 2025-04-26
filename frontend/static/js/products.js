@@ -1,6 +1,25 @@
 // JavaScript для страницы управления товарами
 
 document.addEventListener('DOMContentLoaded', async function() {
+    // --- Фильтрация по названию и фасовке ---
+    const filterBtn = document.getElementById('applyProductTextFilters');
+    if (filterBtn) {
+        filterBtn.addEventListener('click', function() {
+            const nameValue = document.getElementById('productNameFilter').value.toLowerCase();
+            const dosageValue = document.getElementById('productDosageFilter').value.toLowerCase();
+            let products = Array.isArray(window.lastAllProducts) ? window.lastAllProducts : [];
+            if (nameValue) {
+    products = products.filter(p => typeof p.name === 'string' && p.name.toLowerCase().includes(nameValue));
+}
+if (dosageValue) {
+    products = products.filter(p => 
+        Array.isArray(p.dosages) && p.dosages.some(d => typeof d === 'string' && d.toLowerCase().includes(dosageValue))
+    );
+}
+            displayProducts(products);
+        });
+    }
+
     // Получаем роль пользователя
     let userRole = null;
     try {
@@ -114,7 +133,8 @@ async function loadSuppliersForFilter() {
 async function loadProducts() {
     try {
         const products = await apiGet('/products/');
-        displayProducts(products);
+        window.lastAllProducts = Array.isArray(products) ? products : [];
+        displayProducts(window.lastAllProducts);
     } catch (error) {
         console.error('Error loading products:', error);
     }
@@ -132,7 +152,7 @@ async function loadExpiredProducts() {
 }
 
 // Функция для загрузки общей стоимости товаров
-async function loadTotalCost() {
+async function loadTotalCost() { 
     try {
         const totalCost = await apiGet('/products/total-cost/');
         document.getElementById('totalCost').textContent = totalCost.toFixed(2);
@@ -203,6 +223,9 @@ function populatePharmacyDropdown(pharmacies) {
 
 // Функция для отображения списка товаров
 async function displayProducts(products) {
+    // Сохраняем последний отображённый список
+    window.lastDisplayedProducts = products;
+
     const productList = document.getElementById('productList');
     productList.innerHTML = '';
 

@@ -93,7 +93,12 @@
                         </div>
                     </div>
                     <div class="card-body">
-                        <div class="table-responsive">
+    <div class="mb-3 d-flex align-items-center gap-3">
+        <input type="text" id="productNameFilter" class="form-control form-control-sm" placeholder="Поиск по названию..." style="width:200px;">
+        <input type="text" id="productDosageFilter" class="form-control form-control-sm" placeholder="Поиск по фасовке..." style="width:200px;">
+        <button class="btn btn-sm btn-secondary ms-3" id="applyProductTextFilters">Фильтровать</button>
+    </div>
+    <div class="table-responsive">
                             <table class="table table-striped">
                                 <thead>
                                     <tr>
