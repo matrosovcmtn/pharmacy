@@ -8,6 +8,7 @@ from ...schemas.product import Product, ProductCreate, ProductUpdate, ProductWit
 from ...services import product as product_service
 from ..deps import check_director_permission
 from ...db.models_auth import User
+from ...db.models import Supplier
 
 router = APIRouter()
 

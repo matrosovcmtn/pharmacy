@@ -239,11 +239,20 @@ async function displayProducts(products) {
     const productList = document.getElementById('productList');
     productList.innerHTML = '';
 
-    // Получаем роль пользователя
-    let userRole = null;
-
     // Управляем отображением блока добавления товара
     const addProductBlock = document.getElementById('addProductBlock');
+    if (addProductBlock) {
+        addProductBlock.style.display = 'none';
+    }
+    
+    // Получаем роль пользователя
+    let userRole = null;
+    try {
+        const user = await getCurrentUser();
+        userRole = user && user.role ? user.role : null;
+    } catch (e) {
+        userRole = null;
+    }
     if (addProductBlock) {
         if (userRole === 'admin' || userRole === 'supplier') {
             addProductBlock.style.display = '';
@@ -251,13 +260,7 @@ async function displayProducts(products) {
             addProductBlock.style.display = 'none';
         }
     }
-    try {
-        const user = await getCurrentUser();
-        userRole = user && user.role ? user.role : null;
-    } catch (e) {
-        userRole = null;
-    }
-
+    
     products.forEach(product => {
         const row = document.createElement('tr');
         
