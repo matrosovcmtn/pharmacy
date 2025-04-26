@@ -14,7 +14,7 @@ router = APIRouter()
 
 from ..deps import get_current_active_user
 
-@router.get("/", response_model=List[Product])
+@router.get("/", response_model=List[ProductWithSupplier])
 def read_products(
     skip: int = Query(0, description="Количество записей для пропуска"),
     limit: int = Query(100, description="Максимальное количество записей для возврата"),
@@ -22,6 +22,7 @@ def read_products(
     current_user: User = Depends(get_current_active_user)
 ):
     """Получить список всех товаров (для поставщика — только свои)"""
+    from ...services import supplier as supplier_service
     if current_user.role == 'supplier':
         # Получаем supplier_id, связанный с этим пользователем
         supplier = db.query(Supplier).filter(Supplier.user_id == current_user.id).first()
@@ -31,7 +32,18 @@ def read_products(
             products = []
     else:
         products = product_service.get_products(db, skip=skip, limit=limit)
-    return products
+    # Для каждого продукта добавляем preferred_supplier
+    result = []
+    for p in products:
+        supplier_obj = None
+        if getattr(p, 'preferred_supplier_id', None):
+            supplier_db = supplier_service.get_supplier(db, p.preferred_supplier_id)
+            if supplier_db:
+                supplier_obj = {"id": supplier_db.id, "name": supplier_db.name}
+        prod_dict = p.__dict__.copy()
+        prod_dict['preferred_supplier'] = supplier_obj
+        result.append(prod_dict)
+    return result
 
 
 @router.post("/", response_model=Product)

@@ -256,7 +256,7 @@ async function displayProducts(products) {
             <td>${product.price.toFixed(2)} руб.</td>
             <td>${product.quantity}</td>
             <td>${formatDate(product.expiry_date)}</td>
-            <td>${product.preferred_supplier_id ? `ID: ${product.preferred_supplier_id}` : 'Не указан'}</td>
+            <td>${product.preferred_supplier && product.preferred_supplier.name ? product.preferred_supplier.name : 'Не указан'}</td>
             <td>
                 ${(userRole === 'admin') ? `<button class="btn btn-sm btn-primary btn-action" onclick="editProduct(${product.id})">Редактировать</button>` : ''}
                 ${addToPharmacyBtn}
