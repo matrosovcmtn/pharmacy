@@ -36,7 +36,6 @@ function displayPharmacies(pharmacies) {
         row.innerHTML = `
             <td>${pharmacy.id}</td>
             <td>${pharmacy.name}</td>
-            <td>${formatDate(pharmacy.current_date)}</td>
             <td>
                 <button class="btn btn-sm btn-info btn-action" onclick="viewPharmacyProducts(${pharmacy.id}, '${pharmacy.name}')">
                     Товары

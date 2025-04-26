@@ -137,14 +137,17 @@ def add_product_to_pharmacy(db: Session, product_id: int, pharmacy_id: int, quan
             break
     
     if not product_exists:
-        # Добавляем товар в аптеку
-        db_pharmacy.products.append(db_product)
-    
-    # Обновляем количество в таблице связи
-    db.execute(
-        text("UPDATE pharmacy_product SET quantity = quantity + :quantity WHERE pharmacy_id = :pharmacy_id AND product_id = :product_id"),
-        {"quantity": quantity, "pharmacy_id": pharmacy_id, "product_id": product_id}
-    )
+        # Явно создаём запись в pharmacy_product с нужным количеством
+        db.execute(
+            text("INSERT INTO pharmacy_product (pharmacy_id, product_id, quantity) VALUES (:pharmacy_id, :product_id, :quantity) ON CONFLICT (pharmacy_id, product_id) DO UPDATE SET quantity = pharmacy_product.quantity + EXCLUDED.quantity"),
+            {"quantity": quantity, "pharmacy_id": pharmacy_id, "product_id": product_id}
+        )
+    else:
+        # Обновляем количество в таблице связи
+        db.execute(
+            text("UPDATE pharmacy_product SET quantity = quantity + :quantity WHERE pharmacy_id = :pharmacy_id AND product_id = :product_id"),
+            {"quantity": quantity, "pharmacy_id": pharmacy_id, "product_id": product_id}
+        )
     
     db.commit()
     return 1

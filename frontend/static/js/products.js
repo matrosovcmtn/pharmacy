@@ -22,6 +22,16 @@ if (dosageValue) {
 
     // Получаем роль пользователя
     let userRole = null;
+
+    // Управляем отображением блока добавления товара
+    const addProductBlock = document.getElementById('addProductBlock');
+    if (addProductBlock) {
+        if (userRole === 'admin' || userRole === 'supplier') {
+            addProductBlock.style.display = '';
+        } else {
+            addProductBlock.style.display = 'none';
+        }
+    }
     try {
         const user = await getCurrentUser();
         userRole = user && user.role ? user.role : null;
@@ -231,6 +241,16 @@ async function displayProducts(products) {
 
     // Получаем роль пользователя
     let userRole = null;
+
+    // Управляем отображением блока добавления товара
+    const addProductBlock = document.getElementById('addProductBlock');
+    if (addProductBlock) {
+        if (userRole === 'admin' || userRole === 'supplier') {
+            addProductBlock.style.display = '';
+        } else {
+            addProductBlock.style.display = 'none';
+        }
+    }
     try {
         const user = await getCurrentUser();
         userRole = user && user.role ? user.role : null;
