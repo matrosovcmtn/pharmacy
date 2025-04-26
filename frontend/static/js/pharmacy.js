@@ -139,6 +139,10 @@ window.currentPharmacyId = null;
 
 // Функция для просмотра товаров в аптеке
 async function viewPharmacyProducts(pharmacyId, pharmacyName) {
+    // ...
+    // После получения товаров сохраняем их глобально
+    window.lastPharmacyProducts = [];
+
     console.log('viewPharmacyProducts called with pharmacyId:', pharmacyId, 'pharmacyName:', pharmacyName);
     
     // Убедимся, что pharmacyId является числом
@@ -154,10 +158,11 @@ async function viewPharmacyProducts(pharmacyId, pharmacyName) {
     try {
         console.log('Fetching products for pharmacy ID:', pharmacyId);
         const products = await apiGet(`/products/pharmacy/${pharmacyId}`);
+window.lastPharmacyProducts = products;
         console.log('Products received:', products.length);
         
         // Передаем ID аптеки в функцию отображения
-        displayPharmacyProducts(products, pharmacyName, pharmacyId);
+        displayPharmacyProducts(products, pharmacyName, pharmacyId, true);
         
         // Открытие модального окна
         const modal = new bootstrap.Modal(document.getElementById('viewProductsModal'));
@@ -167,8 +172,45 @@ async function viewPharmacyProducts(pharmacyId, pharmacyName) {
     }
 }
 
+// --- Обработчик кнопки фильтрации ---
+document.addEventListener('DOMContentLoaded', function() {
+    const filterBtn = document.getElementById('applyProductFilters');
+    if (filterBtn) {
+        filterBtn.addEventListener('click', function() {
+            const pharmacyName = document.getElementById('viewProductsModalLabel').textContent.replace('Товары в аптеке "', '').replace('"', '');
+            const pharmacyId = window.currentPharmacyId;
+            displayPharmacyProducts(window.lastPharmacyProducts || [], pharmacyName, pharmacyId, false);
+        });
+    }
+});
+
 // Функция для отображения товаров в аптеке
-function displayPharmacyProducts(products, pharmacyName, pharmacyId) {
+function displayPharmacyProducts(products, pharmacyName, pharmacyId, skipFilters) {
+    // skipFilters=true — отрисовать без применения фильтров (после загрузки)
+    if (!skipFilters) {
+        // Берём оригинальный список
+        products = window.lastPharmacyProducts || products || [];
+    }
+
+    // --- Фильтры ---
+    const minPriceInput = document.getElementById('minPriceFilter');
+    const maxPriceInput = document.getElementById('maxPriceFilter');
+    const expiredOnlyCheckbox = document.getElementById('expiredOnlyFilter');
+
+    let filteredProducts = products.slice();
+    if (!skipFilters) {
+        if (minPriceInput && minPriceInput.value) {
+            filteredProducts = filteredProducts.filter(p => p.price >= parseFloat(minPriceInput.value));
+        }
+        if (maxPriceInput && maxPriceInput.value) {
+            filteredProducts = filteredProducts.filter(p => p.price <= parseFloat(maxPriceInput.value));
+        }
+        if (expiredOnlyCheckbox && expiredOnlyCheckbox.checked) {
+            filteredProducts = filteredProducts.filter(p => isExpired(p.expiry_date));
+        }
+    }
+    products = filteredProducts;
+
     console.log('displayPharmacyProducts called with:', {
         productsCount: products.length,
         pharmacyName,
