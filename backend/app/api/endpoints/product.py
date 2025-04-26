@@ -50,9 +50,15 @@ def read_products(
 @router.post("/", response_model=Product)
 def create_product(
     product: ProductCreate,
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_active_user)
 ):
     """Создать новый товар"""
+    # Если пользователь — поставщик, автоматически подставить preferred_supplier_id
+    if current_user.role == 'supplier' and not product.preferred_supplier_id:
+        supplier = db.query(Supplier).filter(Supplier.user_id == current_user.id).first()
+        if supplier:
+            product.preferred_supplier_id = supplier.id
     return product_service.create_product(db=db, product=product)
 
 

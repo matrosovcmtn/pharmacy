@@ -44,27 +44,41 @@ def create_user(db: Session, user: UserCreate) -> User:
     return db_user
 
 def update_user(db: Session, user_id: int, user: UserUpdate) -> Optional[User]:
-    """Обновить информацию о пользователе"""
+    """Обновить информацию о пользователе. Если роль меняется на 'supplier', создать запись Supplier."""
+    from .supplier import get_supplier, create_supplier
     db_user = get_user(db, user_id)
-    
     if not db_user:
         return None
     
-    # Обновляем поля, если они предоставлены
     update_data = user.dict(exclude_unset=True)
-    
+    old_role = db_user.role
     # Если предоставлен новый пароль, хешируем его
     if "password" in update_data and update_data["password"]:
         update_data["hashed_password"] = get_password_hash(update_data.pop("password"))
-    
-    # Обновляем поля пользователя
     for key, value in update_data.items():
         if hasattr(db_user, key) and value is not None:
             setattr(db_user, key, value)
-    
     db.commit()
     db.refresh(db_user)
-    
+    # --- АВТОМАТИЧЕСКОЕ СОЗДАНИЕ ПОСТАВЩИКА ---
+    if (old_role != 'supplier' and db_user.role == 'supplier') or (old_role != 'SUPPLIER' and db_user.role == 'SUPPLIER'):
+        # Проверяем, есть ли уже Supplier для этого пользователя
+        supplier = get_supplier(db, getattr(db_user, 'supplier_id', None))
+        from ..db.models import Supplier
+        if not supplier:
+            # Создаём Supplier
+            supplier_data = {
+                'user_id': db_user.id,
+                'name': db_user.username or db_user.email
+            }
+            new_supplier = Supplier(**supplier_data)
+            db.add(new_supplier)
+            db.commit()
+            db.refresh(new_supplier)
+            # Привязываем supplier_id к пользователю
+            db_user.supplier_id = new_supplier.id
+            db.commit()
+            db.refresh(db_user)
     return db_user
 
 def delete_user(db: Session, user_id: int) -> bool:
