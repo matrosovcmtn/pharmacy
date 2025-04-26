@@ -191,29 +191,6 @@ async function loadPharmacies() {
     }
 }
 
-// Функция для заполнения выпадающих списков поставщиков
-function populateSupplierDropdowns(suppliers) {
-    const supplierSelects = [
-        document.getElementById('productPreferredSupplier'),
-        document.getElementById('editProductPreferredSupplier')
-    ];
-
-    supplierSelects.forEach(select => {
-        if (!select) return;
-        
-        // Очистка списка, оставляя только первый пустой элемент
-        select.innerHTML = '<option value="">Выберите поставщика</option>';
-        
-        // Добавление поставщиков в список
-        suppliers.forEach(supplier => {
-            const option = document.createElement('option');
-            option.value = supplier.id;
-            option.textContent = supplier.name;
-            select.appendChild(option);
-        });
-    });
-}
-
 // Функция для заполнения выпадающего списка аптек
 function populatePharmacyDropdown(pharmacies) {
     const pharmacySelect = document.getElementById('addToPharmacySelect');
@@ -297,7 +274,7 @@ async function addProduct() {
     const dosagesInput = document.getElementById('productDosages').value.trim();
     const quantity = parseInt(document.getElementById('productQuantity').value);
     const expiryDate = document.getElementById('productExpiryDate').value;
-    const preferredSupplierId = document.getElementById('productPreferredSupplier').value;
+    const preferredSupplierId = null; // Поставщик определяется автоматически на сервере
 
     if (!name || isNaN(price) || !dosagesInput || isNaN(quantity) || !expiryDate) {
         showNotification('Пожалуйста, заполните все обязательные поля', 'warning');
