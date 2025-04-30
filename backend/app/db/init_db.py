@@ -21,6 +21,7 @@ INITIAL_PHARMACIES = [
 # Динамически формируемых поставщиков больше нет — они создаются на основе пользователей с ролью SUPPLIER
 
 SUPPLIER_USERS = [
+    {"email": "supplier@pharmacy.com", "username": "supplier", "password": "supplier123", "supplier_name": "ООО ДефолтПоставщик"},
     {"email": "supplier1@pharmacy.com", "username": "supplier1", "password": "supplier123", "supplier_name": "ООО Фармацевтика"},
     {"email": "supplier2@pharmacy.com", "username": "supplier2", "password": "supplier123", "supplier_name": "ЗАО МедПоставки"},
     {"email": "supplier3@pharmacy.com", "username": "supplier3", "password": "supplier123", "supplier_name": "ИП Иванов"},
@@ -127,16 +128,7 @@ def init_db(db) -> None:
             is_active=True
         )
         db.add(director2_user)
-    supplier_user = db.query(User).filter(User.email == "supplier@pharmacy.com").first()
-    if not supplier_user:
-        supplier_user = User(
-            email="supplier@pharmacy.com",
-            username="supplier",
-            hashed_password=get_password_hash("supplier123"),
-            role=UserRole.SUPPLIER,
-            is_active=True
-        )
-        db.add(supplier_user)
+    
     db.commit()
 
     # Получаем id директоров
