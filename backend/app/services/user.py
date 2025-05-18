@@ -82,15 +82,27 @@ def update_user(db: Session, user_id: int, user: UserUpdate) -> Optional[User]:
     return db_user
 
 def delete_user(db: Session, user_id: int) -> bool:
-    """Удалить пользователя"""
+    """
+    Удалить пользователя и отвязать связанные сущности (товары и аптеки)
+    """
+    from ..db.models import Product, Pharmacy
     db_user = get_user(db, user_id)
-    
+
     if not db_user:
         return False
-    
+
+    # Отвязать товары, где пользователь был preferred_supplier (если это supplier)
+    db.query(Product).filter(Product.preferred_supplier_id == user_id).update(
+        {Product.preferred_supplier_id: None}, synchronize_session=False
+    )
+    # Отвязать аптеки, где пользователь был директором
+    db.query(Pharmacy).filter(Pharmacy.director_id == user_id).update(
+        {Pharmacy.director_id: None}, synchronize_session=False
+    )
+
     db.delete(db_user)
     db.commit()
-    
+
     return True
 
 def authenticate_user(db: Session, email: str, password: str) -> Optional[User]:
