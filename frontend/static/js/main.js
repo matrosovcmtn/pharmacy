@@ -104,66 +104,11 @@ async function controlSupplierPageAccess() {
 
 document.addEventListener('DOMContentLoaded', async function() {
     await controlSupplierPageAccess();
-    // Управление видимостью вкладки "Поставщики" и раздела на главной
-    const suppliersNavLink = document.getElementById('suppliersNavLink');
-    const pharmacyNavLink = document.getElementById('pharmacyNavLink');
-    const suppliersSection = document.getElementById('suppliersSection');
-    const pharmaciesSection = document.getElementById('pharmaciesSection');
-    try {
-        const user = await getCurrentUser();
-        // Показываем вкладки "Аптеки" и "Поставщики" только для admin и director, для supplier и гостей скрываем
-        // Вкладка "Поставщики" видна только администратору
-        if (suppliersNavLink) {
-            if (user && user.role === 'admin') {
-                suppliersNavLink.style.display = 'list-item';
-            } else {
-                suppliersNavLink.style.display = 'none';
-            }
-        }
-        if (pharmacyNavLink) {
-            if (user && (user.role === 'admin' || user.role === 'director')) {
-                pharmacyNavLink.style.display = 'list-item';
-            } else {
-                pharmacyNavLink.style.display = 'none';
-            }
-        }
-        // Раздел "Поставщики" на главной только для admin
-        if (suppliersSection) {
-            if (user && user.role === 'admin') {
-                suppliersSection.style.display = '';
-            } else {
-                suppliersSection.style.display = 'none';
-            }
-        }
-        // Раздел "Аптеки" на главной только для admin и director
-        if (pharmaciesSection) {
-            if (user && (user.role === 'admin' || user.role === 'director')) {
-                pharmaciesSection.style.display = '';
-            } else {
-                pharmaciesSection.style.display = 'none';
-            }
-        }
-        // Явно скрываем вкладки для supplier и гостей (на всякий случай)
-        if (suppliersNavLink && (!user || user.role === 'supplier')) {
-            suppliersNavLink.style.display = 'none';
-        }
-        if (pharmacyNavLink && (!user || user.role === 'supplier')) {
-            pharmacyNavLink.style.display = 'none';
-        }
-    } catch (e) {
-        if (suppliersNavLink) suppliersNavLink.style.display = 'none';
-        if (pharmacyNavLink) pharmacyNavLink.style.display = 'none';
-        if (suppliersSection) suppliersSection.style.display = 'none';
-        if (pharmaciesSection) pharmaciesSection.style.display = 'none';
-    }
-
-    // Проверяем, есть ли функция updateNavMenu (из auth.js)
+    // Формируем меню только через функцию updateNavMenu из auth.js
     if (typeof updateNavMenu === 'function') {
         updateNavMenu();
     }
-    
     updateHomePageElements();
-
     // Показываем ссылку на управление аптеками только для администратора
     if (window.location.pathname === '/' || window.location.pathname === '/index.html') {
         try {

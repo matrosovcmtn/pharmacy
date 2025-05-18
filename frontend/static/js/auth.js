@@ -71,6 +71,46 @@ function isSupplier() {
     return getUserRole() === 'supplier';
 }
 
+// Глобальная функция для выполнения API-запросов с авторизацией
+async function fetchWithAuth(url, options = {}) {
+    const token = getToken();
+    if (!options.headers) {
+        options.headers = {};
+    }
+    if (token) {
+        options.headers['Authorization'] = `Bearer ${token}`;
+    }
+    options.headers['Content-Type'] = 'application/json';
+    // Склеиваем базовый URL
+    const separator = API_URL.endsWith('/') || url.startsWith('/') ? '' : '/';
+    const fullUrl = `${API_URL}${separator}${url}`;
+    try {
+        const response = await fetch(fullUrl, options);
+        return response;
+    } catch (error) {
+        console.error('API request error:', error);
+        throw error;
+    }
+}
+
+// Глобальная функция выхода пользователя
+function logout() {
+    removeToken();
+    window.location.href = '/login';
+}
+
+
+// Функция для проверки, является ли пользователь директором
+function isDirector() {
+    const role = getUserRole();
+    return role === 'director' || role === 'admin';
+}
+
+// Функция для проверки, является ли пользователь поставщиком
+function isSupplier() {
+    return getUserRole() === 'supplier';
+}
+
 // Функция для выполнения API-запросов с авторизацией
 async function fetchWithAuth(url, options = {}) {
     const token = getToken();
@@ -208,20 +248,29 @@ async function updateNavMenu() {
     if (isAuthenticated()) {
         // Обновляем основное навигационное меню
         if (mainNav) {
-            mainNav.innerHTML = `
+            const role = getUserRole();
+            let navHtml = `
                 <li class="nav-item">
                     <a class="nav-link" href="/">Главная</a>
                 </li>
+            `;
+            // Только не для поставщика
+            if (role !== 'supplier') {
+                navHtml += `
                 <li class="nav-item">
                     <a class="nav-link" href="/pharmacy">Аптеки</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="/products">Товары</a>
-                </li>
-                <li class="nav-item">
                     <a class="nav-link" href="/suppliers">Поставщики</a>
                 </li>
+                `;
+            }
+            navHtml += `
+                <li class="nav-item">
+                    <a class="nav-link" href="/products">Товары</a>
+                </li>
             `;
+            mainNav.innerHTML = navHtml;
         }
         
         // Обновляем меню авторизации

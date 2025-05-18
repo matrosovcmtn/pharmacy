@@ -178,35 +178,18 @@
 
     <footer class="footer mt-auto py-3 bg-light">
         <div class="container text-center">
-            <span class="text-muted">© 2025 Система управления аптекой</span>
+            <span class="text-muted"> 2025 Система управления аптекой</span>
         </div>
     </footer>
 
     <script src="/static/js/bootstrap.bundle.min.js"></script>
+    <script src="/static/js/auth.js"></script>
+    <script src="/static/js/users.js"></script>
     <script>
-        // Отключаем проверку прав доступа
-        window.addEventListener('DOMContentLoaded', function() {
-            console.log('Users page loaded');
-            
-            // Загружаем auth.js с отключенной проверкой
-            const authScript = document.createElement('script');
-            authScript.textContent = `
-                // Базовый URL API
-                const API_URL = '/api/v1';
-                
-                // Функции для работы с токенами
-                function saveToken(token) {
-                    localStorage.setItem('token', token);
-                }
-                
-                function getToken() {
-                    return localStorage.getItem('token');
-                }
-                
-                function removeToken() {
-                    localStorage.removeItem('token');
-                }
-                
+        document.addEventListener('DOMContentLoaded', function() {
+            const logoutLink = document.getElementById('logout-link');
+            if (logoutLink) {
+                logoutLink.addEventListener('click', function(e) {
                 function isAuthenticated() {
                     return !!getToken();
                 }

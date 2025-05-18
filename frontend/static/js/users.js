@@ -159,6 +159,7 @@ async function updateUser(userId, userData) {
 
 // Функция для удаления пользователя
 async function deleteUser(userId) {
+    console.log('deleteUser called', userId);
     // Проверяем, не пытается ли пользователь удалить самого себя
     if (userId === parseInt(getUserId())) {
         alert('Вы не можете удалить собственную учетную запись');
@@ -175,8 +176,16 @@ async function deleteUser(userId) {
         });
         
         if (!response || !response.ok) {
-            const errorData = await response.json();
-            throw new Error(errorData.detail || 'Ошибка при удалении пользователя');
+            let errorMsg = 'Ошибка при удалении пользователя';
+            try {
+                const errorData = await response.json();
+                errorMsg = errorData.detail || errorMsg;
+            } catch (jsonErr) {
+                // Если ответ не JSON — читаем текст
+                const errorText = await response.text();
+                errorMsg = errorText || errorMsg;
+            }
+            throw new Error(errorMsg);
         }
         
         // Перезагружаем список пользователей
