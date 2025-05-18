@@ -78,11 +78,7 @@ function editPharmacy(id, name, date) {
     document.getElementById('editPharmacyId').value = id;
     document.getElementById('editPharmacyName').value = name;
     
-    // Форматирование даты для input типа datetime-local
-    const dateObj = new Date(date);
-    const formattedDate = dateObj.toISOString().slice(0, 16);
-    document.getElementById('editPharmacyDate').value = formattedDate;
-    
+
     // Открытие модального окна
     const modal = new bootstrap.Modal(document.getElementById('editPharmacyModal'));
     modal.show();
@@ -92,7 +88,6 @@ function editPharmacy(id, name, date) {
 async function updatePharmacy() {
     const id = document.getElementById('editPharmacyId').value;
     const name = document.getElementById('editPharmacyName').value.trim();
-    const currentDate = document.getElementById('editPharmacyDate').value;
 
     if (!name) {
         showNotification('Введите название аптеки', 'warning');
@@ -101,8 +96,7 @@ async function updatePharmacy() {
 
     try {
         const data = { 
-            name,
-            current_date: new Date(currentDate).toISOString()
+            name
         };
         const result = await apiPut(`/pharmacies/${id}`, data);
         showNotification('Аптека успешно обновлена');
@@ -289,11 +283,12 @@ function displayPharmacyProducts(products, pharmacyName, pharmacyId, skipFilters
                 <td id="delete-cell-${product.id}"></td>
             `;
             
-            // Кнопка удаления только для директора, если он владелец аптеки
+            // Кнопка удаления для директора (владелец аптеки)
             if (userRole === 'director' && product.pharmacy_director_id === userId) {
                 const deleteButton = document.createElement('button');
                 deleteButton.className = 'btn btn-sm btn-danger';
                 deleteButton.textContent = 'Удалить';
+                deleteButton.title = 'Удалить товар из аптеки';
                 deleteButton.addEventListener('click', function() {
                     const pid = product.id;
                     const phid = currentPharmacyId;
@@ -301,6 +296,10 @@ function displayPharmacyProducts(products, pharmacyName, pharmacyId, skipFilters
                 });
                 const deleteCell = row.querySelector(`#delete-cell-${product.id}`);
                 deleteCell.appendChild(deleteButton);
+            } else {
+                // Для других ролей или если не владелец — пустая ячейка
+                const deleteCell = row.querySelector(`#delete-cell-${product.id}`);
+                deleteCell.textContent = '';
             }
             productsList.appendChild(row);
         });
